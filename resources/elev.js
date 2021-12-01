@@ -284,25 +284,28 @@ function createNewPerson(currentTime) {
    * Adds the person to spritesByFloor array.
    * Calculates nextArrivalsTime.
    */
-  let newSpritesFloor = Math.floor(Math.random()*numFloors);
-  let newSpritesDest = -1;
+  let startingFloor = Math.floor(Math.random()*numFloors);
+  let destinationFloor = -1;
   
-  if (newSpritesFloor > 0) {
+  // Appropriately choose random destination
+  if (startingFloor > 0) {
     // most likely going to floor zero
     if (Math.random() < 0.85) {
-      newSpritesDest = 0;
+      destinationFloor = 0;
     } else{
+      // random floor different from starting floor
       do {
-        newSpritesDest = Math.floor(Math.random()*numFloors);
-      } while (newSpritesFloor == newSpritesDest);
+        destinationFloor = Math.floor(Math.random()*numFloors);
+      } while (startingFloor == destinationFloor);
     }
   } else {
-    // starting floor is 0
-    newSpritesDest = Math.floor(Math.random()*(numFloors-1))+1;
+    // starting floor is 0 so pick any non zero floor for destination
+    destinationFloor = Math.floor(Math.random()*(numFloors-1))+1;
   }
 
-  spritesByFloor[newSpritesFloor].push(new Person(elapsed,newSpritesFloor,newSpritesDest));
-
+  // Store reference to this new person
+  spritesByFloor[startingFloor].push(new Person(elapsed,startingFloor,destinationFloor));
+  // Random arrival time for the next person
   nextArrivalsTime = elapsed + randPoisson(100);
 }
 
@@ -340,13 +343,13 @@ function pressButtonOnElev(floor) {
 /**
  * TODO: Move these elsewhere.
  */
-let personsWaitingByFloor = []; // each floor is bool array
+let queuePositionsByFloor = []; // each floor is bool array
 for (let i = 0; i<numFloors; i++) {
-    personsWaitingByFloor[i] = [];
+    queuePositionsByFloor[i] = new Array(100).fill(false);
 }
-let countOfWaitingByFloor = Array(numFloors).fill(0);
+//let countOfWaitingByFloor = Array(numFloors).fill(0);
 let personsMovementSpeed = 10;
-let listOfPersons = [];
+let passengers = [];
 
 class Person {
   constructor(currentTime, floor, destinationFloor) {
@@ -367,7 +370,9 @@ class Person {
      * 200 = departed elevator, walking to the exit.
      * 999 = awaiting destruction.
      */
-    this.positionInQueue = personsWaitingByFloor[this.startingFloor].push(true) - 1;
+    this.positionInQueue = queueLengthByFloor + 1;
+    queueLengthByFloor ++;
+    queuePositionsByFloor[this.startingFloor][this.positionInQueue] = true;
 
     requestElevator(floor);
 
@@ -391,16 +396,16 @@ class Person {
                             elev.currentlyBoardingCount ++;
                             elev.aboardCount ++;
                             this.currentStatus = 1;
-                            personsWaitingByFloor[this.startingFloor][this.positionInQueue] = false;
+                            queuePositionsByFloor[this.startingFloor][this.positionInQueue] = false;
                             this.positionInQueue = -1;
                         }
                     }
                 }
-            } else if (personsWaitingByFloor[this.startingFloor][this.positionInQueue-1] == false) {
+            } else if (queuePositionsByFloor[this.startingFloor][this.positionInQueue-1] == false) {
                 // if space to the right freed up, move right
-                personsWaitingByFloor[this.startingFloor][this.positionInQueue] = false;
+                queuePositionsByFloor[this.startingFloor][this.positionInQueue] = false;
                 this.positionInQueue -- ;
-                personsWaitingByFloor[this.startingFloor][this.positionInQueue] = true;
+                queuePositionsByFloor[this.startingFloor][this.positionInQueue] = true;
             }
             
             if (this.x < floorZeroX - 10 * (this.positionInQueue + 1)) {
@@ -497,17 +502,17 @@ app.ticker.add((delta) => {
         createNewPerson(elapsed);
     }
     // Destroyer
-    for (let i = 0; i < listOfPersons.length; i++) {
-        if (listOfPersons[i].currentStatus == 999){
-            listOfPersons[i].destroy();
-            listOfPersons.splice(i,1);
+    for (let i = 0; i < passengers.length; i++) {
+        if (passengers[i].currentStatus == 999){
+            passengers[i].destroy();
+            passengers.splice(i,1);
             i--;
         }
     }
 
     // Move people
-    for (let i = 0; i < listOfPersons.length; i++) {
-        listOfPersons[i].move(elapsed,delta);
+    for (let i = 0; i < passengers.length; i++) {
+        passengers[i].move(elapsed,delta);
     }
 
     // Move elevator

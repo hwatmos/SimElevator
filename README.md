@@ -55,6 +55,20 @@ I'm using this branch to re-do my code after some initial experimentation in the
       * Keep moving sprite towards the exit.
       * Once the exit is reached, changes state to 999;
     * 999 - Ready for Destruct.
+  * Notes - functions
+    * createNewPerson()
+    * pickPersonsColor()
+    * requestElevator()
+    * pressButtonOnElev()
+  * Notes - other objects
+    * spritesByFloor - array holds arrays of references to passengers. Replacing this with passengers array.
+    * passengers - array of references to passengers.
+    * floorRequests - array of bools
+    * elevRequests - array of bools
+    * queuePositionsByFloor - array of arrays of bool. Which positions in the queue are occupied? Used to move sprites.
+    * queueLengthByFloor
+    * 
+
       
 
 ### TODO: 
