@@ -105,7 +105,7 @@ const style = new PIXI.TextStyle({
 
 const richText = new PIXI.Text('0xhwatmos', style);
 richText.x = 10;
-richText.y = 50;
+richText.y = 275;
 richText.interactive = true;
 richText.on('pointerdown', (event) => { console.log('clicked!'); });
 
@@ -118,8 +118,8 @@ app.stage.addChild(richText);
  * *Setup
  */
 let numFloors = 10;
-let floorZeroX = 500;
-let floorZeroY = 500;
+let floorZeroX = 200;
+let floorZeroY = 250;
 let floorHeight = 25;
 let eleWidth = 15;
 
@@ -173,8 +173,8 @@ class ElevatorConsole {
     this.graphic.drawRoundedRect(0,0,44,numFloors/2*20 + 5,2);
     this.texture = app.renderer.generateTexture(this.graphic);
     this.sprite = new PIXI.Sprite(this.texture);
-    this.sprite.x = 100;
-    this.sprite.y = 100;
+    this.sprite.x = floorZeroX+120;
+    this.sprite.y = floorZeroY - floorHeight * numFloors + floorHeight +20;
     // Buttons
     this.buttons = new Array(numFloors);
     this.activeButtonGraphic = new PIXI.Graphics();
@@ -193,7 +193,7 @@ class ElevatorConsole {
       let col = i % 2 == 0 ? 0 : 1;
       this.buttons[i].sprite = new PIXI.Sprite(this.inactiveButtonTexture);
       this.buttons[i].sprite.x = 5 + col * 20
-      this.buttons[i].sprite.y = 5 + Math.floor(i/2) * 20
+      this.buttons[i].sprite.y = 5 + (Math.ceil(numFloors/2) - Math.floor(i/2) - 1) * 20
       this.sprite.addChild(this.buttons[i].sprite)
     }
     container.addChild(this.sprite);
@@ -228,8 +228,60 @@ class ElevatorConsole {
  floorGraphics.lineTo(floorZeroX+100,floorZeroY + floorHeight);
  floorGraphics.moveTo(0,floorZeroY + floorHeight);
  floorGraphics.lineTo(maxX,floorZeroY + floorHeight);
+ floorGraphics.moveTo(floorZeroX+eleWidth,floorZeroY - (numFloors-1)*floorHeight)
+ floorGraphics.lineTo(floorZeroX+eleWidth,floorZeroY + floorHeight);
+ floorGraphics.moveTo(floorZeroX+1.5,floorZeroY - (numFloors-1)*floorHeight)
+ floorGraphics.lineTo(floorZeroX+1.5,floorZeroY + floorHeight);
+ 
  
  container.addChild(floorGraphics);
+
+/**
+ * *Floor numbers and buttons
+ */
+class Floors {
+  constructor() {
+    // Initiate sprite
+    let colorPalette = [0xafc9ff, 0xc7d8ff, 0xfff4f3, 0xffe5cf, 0xffd9b2, 0xffffff, 0xffa651];
+    this.graphic = new PIXI.Graphics();
+    this.graphic.lineStyle(1,0xafc9ff,1,0.5,false);
+    this.graphic.drawRoundedRect(0,0,44,numFloors/2*20 + 5,2);
+    this.texture = app.renderer.generateTexture(this.graphic);
+    this.sprite = new PIXI.Sprite();
+    this.sprite.x = floorZeroX-3;
+    this.sprite.y = floorZeroY-(numFloors)*floorHeight + 15;
+    // Buttons
+    this.buttons = new Array(numFloors);
+    this.activeButtonGraphic = new PIXI.Graphics();
+    this.activeButtonGraphic.lineStyle(1,0xffffff,1,0.5,false);
+    this.activeButtonGraphic.beginFill(0xffffff);
+    this.activeButtonGraphic.drawCircle(0,0,.5)
+    this.activeButtonGraphic.endFill();
+    this.activeButtonTexture = app.renderer.generateTexture(this.activeButtonGraphic);
+    this.inactiveButtonGraphic = new PIXI.Graphics();
+    this.inactiveButtonGraphic.lineStyle(1,0x3d3b49,1,0.5,false);
+    this.inactiveButtonGraphic.drawCircle(0,0,.5)
+    this.inactiveButtonTexture = app.renderer.generateTexture(this.inactiveButtonGraphic);
+    for (let i=numFloors-1; i>=0; i--) {
+      this.buttons[i] = new Object;
+      this.buttons[i].sprite = new PIXI.Sprite(this.inactiveButtonTexture);
+      this.buttons[i].sprite.x = 0
+      this.buttons[i].sprite.y = (10 - i) * floorHeight
+      this.sprite.addChild(this.buttons[i].sprite)
+    }
+    container.addChild(this.sprite);
+
+    this.update = function () {
+      for (let i=numFloors-1; i>=0; i--) {
+        if (floorRequests[i]) {
+          this.buttons[i].sprite.texture = this.activeButtonTexture;
+        } else {
+          this.buttons[i].sprite.texture = this.inactiveButtonTexture;
+        }
+      }
+    }
+  }
+}
 
 // #endregion
 /////////////////////////////////////////////////////////////////////////////////
@@ -636,9 +688,10 @@ class Person {
     this.direction = this.destinationFloor > this.startingFloor ? 1 : -1;
     this.requestedElevator = false;
 
-    this.x = Math.min(floorZeroX - 10 * (queueLengthByFloor[floor] + 1),floorZeroX - 100);
+    this.x = Math.min(floorZeroX - 10 * (queueLengthByFloor[floor] + 1),floorZeroX - Math.random()*80 - 20);
+    this.x = this.startingFloor==0 ? 0 : this.x;
     this.y = floorZeroY - floorHeight * floor + 15;
-    this.exitDoorXLoc = floorZeroX + (this.destinationFloor==0 ? 90 : Math.random()+90);
+    this.exitDoorXLoc = floorZeroX + (this.destinationFloor==0 ? maxX : Math.random()*95);
     this.currentStatus = 0;
     /**
      * 0   = waiting for the elevator.
@@ -669,7 +722,7 @@ class Person {
                 this.x += personsMovementSpeed * timeDelta / 60;
             }
             else if (this.positionInQueue == 0) { // first in queue...
-                if (! this.requestedElevator || (! floorRequests[this.startingFloor] && elev.curFloor != this.startingFloor)) {
+                if (! this.requestedElevator && !(elev.curFloor == this.startingFloor && elev.currentStatus == 1) || (! floorRequests[this.startingFloor] && elev.curFloor != this.startingFloor)) {
                   requestElevator(this.startingFloor);
                   this.requestedElevator = true;
                 }
@@ -781,6 +834,7 @@ class Person {
 //#region Game loop
 elev = new Elevator();
 elevConsole = new ElevatorConsole();
+floors = new Floors();
 
 app.stage.addChild(container);
 /**
@@ -830,6 +884,7 @@ app.ticker.add((delta) => {
     stats_aboardCount.text = 'Aboard: ' + elev.aboardCount;
 
     elevConsole.update();
+    floors.update();
 
 });
 //#endregion
