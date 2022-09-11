@@ -1,7 +1,7 @@
 /**
  * *Dev Notes
  * 2022-09-11
- * - Finished Person and Elevator logic and finalized working version 1.00.
+ * - Finished Person and Elevator logic and finalized working version beta 1.0.0.
  * 2021-11-14
  * - Updated Persons class. The class now adjusts elevator's boarding, departing,
  * and aboard counts so that the elevator knows when it can start closing doors.
