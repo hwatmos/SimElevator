@@ -2,7 +2,10 @@
 Simulation of an elevator and its passengers.
 
 ## Issues
-Sometimes sims wait for the elevator, i.e. have status 0 but the global floor request for that floor is false.  Elevator will only pick them up if another sim goes to that floor.
+
+- Sometimes sims wait for the elevator, i.e. have status 0 but the global floor request for that floor is false.  Elevator will only pick them up if another sim goes to that floor.
+  - Fix added, need to test more to see if it work properly (added delay before closing door to allow additional iterations and sims to begin boarding).
+- Sometimes when picking sims from the highest floor and going down, it seems that the button is still on on that floor.
 
 # API
 
