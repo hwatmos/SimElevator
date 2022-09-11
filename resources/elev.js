@@ -1,5 +1,8 @@
 /**
  * *Dev Notes
+ * 2022-09-11 - 1.0.1 beta
+ * - Door close logic incorrectly handled the case when direction was down, it would
+ *   not allow new and only passenger to switch direction to up.
  * 2022-09-11
  * - Finished Person and Elevator logic and finalized working version beta 1.0.0.
  * 2021-11-14
@@ -363,15 +366,33 @@ function Elevator() {
                 }
               }
               case -1: {
-                if (this.higestRequestedFloor < this.curFloor && this.higestRequestedFloor >= 0 || higestRequestedFloor < this.curFloor && higestRequestedFloor >= 0) {
-                  this.currentStatus = 101;
-                  this.direction = -1;
-                  break;
+                if (this.aboardCount > 0) {
+                  if (this.higestRequestedFloor < this.curFloor && this.higestRequestedFloor >= 0) {
+                    this.currentStatus = 101;
+                    this.direction = -1;
+                    break;
+                  }
+                  else if (this.higestRequestedFloor > this.curFloor) {
+                    this.currentStatus = 100;
+                    this.direction = 1;
+                    break;
+                  }
                 }
                 else {
-                  this.currentStatus = 0;
-                  this.direction = 0;
-                  break;
+                  if (higestRequestedFloor < this.curFloor && higestRequestedFloor >= 0) {
+                    this.currentStatus = 101;
+                    this.direction = -1;
+                    break;
+                  }
+                  else if (higestRequestedFloor > this.curFloor && higestRequestedFloor >= 0) {
+                    this.currentStatus = 100;
+                    this.direction = 1;
+                    break;
+                  }
+                  else {
+                    this.currentStatus = 0;
+                    this.direction = 0;
+                  }
                 }
               }
               case 0: {
@@ -736,7 +757,8 @@ app.ticker.add((delta) => {
     elev.move(delta, elapsed);
 
     if (elevatorsLastStatus != elev.currentStatus) {
-      //console.log("Elevator's status changed to " + elev.currentStatus);
+      console.log("*** Elevator's status changed to " + elev.currentStatus);
+      console.log(elev);  
       //console.log("aboard: " + elev.aboardCount);
       elevatorsLastStatus = elev.currentStatus;
     }
