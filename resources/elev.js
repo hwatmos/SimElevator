@@ -146,7 +146,7 @@ let idxCountByFloor = new Array(numFloors).fill(0);
 /////////////////////////////////////////////////////////////////////////////////
 //#region Stats
 /**
- * *Statistics
+ * *Statistics & info
  */
 const stat_style = new PIXI.TextStyle({
   fontFamily: 'Courier New',
@@ -164,6 +164,52 @@ stats_aboardCount.on('pointerdown', (event) => { console.log('clicked!'); });
 
 app.stage.addChild(stats_aboardCount);
 
+class ElevatorConsole {
+  constructor() {
+    // Initiate sprite
+    let colorPalette = [0xafc9ff, 0xc7d8ff, 0xfff4f3, 0xffe5cf, 0xffd9b2, 0xffffff, 0xffa651];
+    this.graphic = new PIXI.Graphics();
+    this.graphic.lineStyle(1,0xafc9ff,1,0.5,false);
+    this.graphic.drawRoundedRect(0,0,44,numFloors/2*20 + 5,2);
+    this.texture = app.renderer.generateTexture(this.graphic);
+    this.sprite = new PIXI.Sprite(this.texture);
+    this.sprite.x = 100;
+    this.sprite.y = 100;
+    // Buttons
+    this.buttons = new Array(numFloors);
+    this.activeButtonGraphic = new PIXI.Graphics();
+    this.activeButtonGraphic.lineStyle(1,0xafc9ff,1,0.5,false);
+    this.activeButtonGraphic.beginFill(0xafc9ff);
+    this.activeButtonGraphic.drawCircle(0,0,7)
+    this.activeButtonGraphic.endFill();
+    this.activeButtonTexture = app.renderer.generateTexture(this.activeButtonGraphic);
+    this.inactiveButtonGraphic = new PIXI.Graphics();
+    this.inactiveButtonGraphic.lineStyle(1,0xafc9ff,1,0.5,false);
+    this.inactiveButtonGraphic.drawCircle(0,0,7)
+    this.inactiveButtonTexture = app.renderer.generateTexture(this.inactiveButtonGraphic);
+    for (let i=numFloors-1; i>=0; i--) {
+      this.buttons[i] = new Object;
+      // left or right
+      let col = i % 2 == 0 ? 0 : 1;
+      this.buttons[i].sprite = new PIXI.Sprite(this.inactiveButtonTexture);
+      this.buttons[i].sprite.x = 5 + col * 20
+      this.buttons[i].sprite.y = 5 + Math.floor(i/2) * 20
+      this.sprite.addChild(this.buttons[i].sprite)
+    }
+    container.addChild(this.sprite);
+
+    this.update = function () {
+      for (let i=numFloors-1; i>=0; i--) {
+        if (elev.floorRequests[i]) {
+          this.buttons[i].sprite.texture = this.activeButtonTexture;
+        } else {
+          this.buttons[i].sprite.texture = this.inactiveButtonTexture;
+        }
+      }
+    }
+  }
+}
+//do this: if don't close the door right away, instead wait few iterations.  this should help with the current issue
 // #endregion
 /////////////////////////////////////////////////////////////////////////////////
 //#region Static graphics
@@ -220,6 +266,8 @@ function Elevator() {
 
     this.lastFloor = 0; // when moving up or down, don't stop at last floor where the door was open. this avoids infinite open close loops
 
+    this.doorCloseDelay = 0;
+
     this.doorIsOpen = true;
     this.aboardCount = 0;
     this.MAX_ABOARD = 5;
@@ -270,7 +318,6 @@ function Elevator() {
                   console.log(higestRequestedFloor)
                 }
                 else {
-                  //console.log('oopsie');
                   this.currentStatus = i > this.curFloor ? 100 : 101;
                   this.direction = i > this.curFloor ? 1 : -1;
                 }
@@ -280,11 +327,16 @@ function Elevator() {
 
           case 1: // door is open, passengers are boarding and exiting
             if (this.currentlyBoardingCount == 0 && this.currentlyDepartingCount == 0) {
-              this.currentStatus = 300;
+              if (this.doorCloseDelay >= 6) {
+                this.currentStatus = 300;
+                this.doorCloseDelay = 0;
+              } else {
+                this.doorCloseDelay += 1;
+              }
             }
             break;
 
-          case 100: // going up // ! HERE.  maybe a function that translates floor number to elevator y?  
+          case 100: // going up
             // go up and stop in only two cases: riders' destination, or the highest requested floor
             this.goingUp = true; // TODO: DELETE
             this.curFloor = elevYToFloorIfSafe(this.y)
@@ -507,7 +559,7 @@ function createNewPerson(currentTime, forceFloor=-1) {
   // Store reference to this new person
   spritesByFloor[startingFloor].push(new Person(elapsed,startingFloor,destinationFloor));
   // Random arrival time for the next person
-  nextArrivalsTime = elapsed + randPoisson(500);
+  nextArrivalsTime = elapsed + randPoisson(400);
 }
 
 function pickPersonsColor(floor) {
@@ -617,8 +669,8 @@ class Person {
                 this.x += personsMovementSpeed * timeDelta / 60;
             }
             else if (this.positionInQueue == 0) { // first in queue...
-                if (! this.requestedElevator) {
-                  requestElevator(floor);
+                if (! this.requestedElevator || (! floorRequests[this.startingFloor] && elev.curFloor != this.startingFloor)) {
+                  requestElevator(this.startingFloor);
                   this.requestedElevator = true;
                 }
                 if (elev.curFloor == this.startingFloor) { // ... and elevator is here - consider boarding.
@@ -706,10 +758,19 @@ class Person {
     this.graphic.lineStyle(0);
     this.graphic.drawCircle(0, 0, 2);
     this.graphic.endFill();
+
     this.texture = app.renderer.generateTexture(this.graphic);
     this.sprite = new PIXI.Sprite(this.texture);
     this.sprite.x = this.x;
     this.sprite.y = this.y;
+
+    // Label person with their destination floor
+    this.label = new PIXI.Text(this.destinationFloor, stat_style);
+    this.label.x = -2;
+    this.label.y = -14;
+    this.label.interactive = true;
+    this.label.on('pointerdown', (event) => { console.log('clicked!'); });
+    this.sprite.addChild(this.label);
 
     container.addChild(this.sprite);
   }
@@ -719,6 +780,7 @@ class Person {
 /////////////////////////////////////////////////////////////////////////////////
 //#region Game loop
 elev = new Elevator();
+elevConsole = new ElevatorConsole();
 
 app.stage.addChild(container);
 /**
@@ -727,7 +789,7 @@ app.stage.addChild(container);
 
 // Add a ticker callback to move the sprites
 let elapsed = 0.0;
-let nextArrivalsTime = elapsed + randPoisson(100);
+let nextArrivalsTime = elapsed + randPoisson(60);
 // temporary for test
 createNewPerson(elapsed,0);
 app.ticker.add((delta) => {
@@ -766,6 +828,8 @@ app.ticker.add((delta) => {
     //console.log(elev.direction)
 
     stats_aboardCount.text = 'Aboard: ' + elev.aboardCount;
+
+    elevConsole.update();
 
 });
 //#endregion
