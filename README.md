@@ -1,6 +1,8 @@
 # SimElevator
 Simulation of an elevator and its passengers.
 
+![Video of a elevator simulator](docs/simElevator01.gif)
+
 ## Issues
 
 - Sometimes sims wait for the elevator, i.e. have status 0 but the global floor request for that floor is false.  Elevator will only pick them up if another sim goes to that floor.
