@@ -86,7 +86,7 @@ let container = new PIXI.Container();
  */
 const style = new PIXI.TextStyle({
   fontFamily: 'Courier New',
-  fontSize: 36,
+  fontSize: 24,
   //fontStyle: 'italic',
   //fontWeight: 'bold',
   //fill: ['#ffffff', '#00ff99'], // gradient
@@ -103,7 +103,7 @@ const style = new PIXI.TextStyle({
   lineJoin: 'round',
 });
 
-const richText = new PIXI.Text('0xhwatmos', style);
+const richText = new PIXI.Text('0xhhh', style);
 richText.x = 10;
 richText.y = 275;
 richText.interactive = true;
@@ -123,7 +123,6 @@ let floorZeroY = 250;
 let floorHeight = 25;
 let eleWidth = 15;
 
-let floorQueue = []; //*TODO: replacing this with floorRequests list
 let floorRequests = new Array(numFloors).fill(false);
 //let elevRequests = new Array(numFloors).fill(false); // TODO: delete?
 let ridersQueue = [];
@@ -141,6 +140,8 @@ let spritesOnElev = [];
 let queueLengthByFloor = new Array(numFloors).fill(0); // count of Sprites waiting
 // i.e. excludes sprites that are from this floor but are already on elevator
 let idxCountByFloor = new Array(numFloors).fill(0); 
+
+let poissonLambda = 290;
 
 // #endregion
 /////////////////////////////////////////////////////////////////////////////////
@@ -611,7 +612,7 @@ function createNewPerson(currentTime, forceFloor=-1) {
   // Store reference to this new person
   spritesByFloor[startingFloor].push(new Person(elapsed,startingFloor,destinationFloor));
   // Random arrival time for the next person
-  nextArrivalsTime = elapsed + randPoisson(400);
+  nextArrivalsTime = elapsed + randPoisson(poissonLambda);
 }
 
 function pickPersonsColor(floor) {
