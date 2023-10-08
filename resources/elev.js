@@ -677,7 +677,7 @@ for (let i = 0; i<numFloors; i++) {
     queuePositionsByFloor[i] = new Array(100).fill(false);
 }
 //let countOfWaitingByFloor = Array(numFloors).fill(0);
-let personsMovementSpeed = 10;
+let personsMovementSpeed = 10 * SPEED;
 let passengers = [];
 
 class Person {
