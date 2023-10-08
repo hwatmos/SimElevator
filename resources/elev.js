@@ -21,7 +21,7 @@
  */
 
  function randPoisson(lambda) {
-  let L = Math.exp(-lambda);
+  let L = Math.exp(-lambda/SPEED);
   let p = 1.0;
   let k = 0;
 
@@ -102,14 +102,40 @@ const style = new PIXI.TextStyle({
   //wordWrapWidth: 440,
   lineJoin: 'round',
 });
+const style2 = new PIXI.TextStyle({
+  fontFamily: 'Courier New',
+  fontSize: 13,
+  //fontStyle: 'italic',
+  //fontWeight: 'bold',
+  //fill: ['#ffffff', '#00ff99'], // gradient
+  fill: '#33ff00',
+  //stroke: '#4a1850',
+  strokeThickness: 0,
+  //dropShadow: true,
+  //dropShadowColor: '#000000',
+  //dropShadowBlur: 4,
+  //dropShadowAngle: Math.PI / 6,
+  //dropShadowDistance: 6,
+  //wordWrap: true,
+  //wordWrapWidth: 440,
+  lineJoin: 'round',
+});
 
-const richText = new PIXI.Text('0xhhh', style);
+const richText = new PIXI.Text('I am Kamil Luto aka 0xhwatmos and this is my homep', style);
 richText.x = 10;
 richText.y = 275;
 richText.interactive = true;
 richText.on('pointerdown', (event) => { console.log('clicked!'); });
 
 app.stage.addChild(richText);
+
+const richText2 = new PIXI.Text('If the elevator escapes the building... Do not call for help! :)', style2);
+richText2.x = 10;
+richText2.y = 300;
+richText2.interactive = true;
+richText2.on('pointerdown', (event) => { console.log('clicked!'); });
+
+app.stage.addChild(richText2);
 
 // #endregion
 /////////////////////////////////////////////////////////////////////////////////
@@ -141,7 +167,13 @@ let queueLengthByFloor = new Array(numFloors).fill(0); // count of Sprites waiti
 // i.e. excludes sprites that are from this floor but are already on elevator
 let idxCountByFloor = new Array(numFloors).fill(0); 
 
-let poissonLambda = 290;
+let poissonLambda = 350;//290;
+
+let SPEED = 5; //10 and above causes moon-shot or hell-ride
+let MAX_PASSENGERS = 10;
+let MAX_QUEUE_LENGTH = 10; //won't create a new person if adding the person exceeds max
+// queue lengths for that person's starting floor. This helps to keep spillage beyond
+// the building's walls and makes the simulation a bit prettier.
 
 // #endregion
 /////////////////////////////////////////////////////////////////////////////////
@@ -296,10 +328,18 @@ function elevYToFloorIfSafe(y) {
   if (Math.floor(-(y - threshold - floorZeroY) / floorHeight) == upperFloor) {
     // stop here, i.e. upperFloor
     floor = upperFloor;
+    // Prevent overshooting (at high speeds, the elevator shoots above or below the bulding)
+    // (does not work, need to handle in elevator's logic)
+    //floor = Math.max(0,floor);
+    //floor = Math.min(numFloors,floor);
   }
   else if (Math.ceil(-(y + threshold - floorZeroY) / floorHeight) == lowerFloor) {
     // stop here, i.e. lowerFloor
     floor = lowerFloor;
+    // Prevent overshooting (at high speeds, the elevator shoots above or below the bulding)
+    // (does not work, need to handle in elevator's logic)
+    //floor = Math.max(0,floor);
+    //floor = Math.min(numFloors,floor);
   }
   return floor;
 }
@@ -311,7 +351,7 @@ function Elevator() {
 
     this.curFloor = 0;
     this.nextFloor = 0; // TODO: delete?
-    this.movSpeed = 1.5; // value of one gave me about 1 second per floor
+    this.movSpeed = 1.5 * SPEED; // value of one gave me about 1 second per floor
     this.idle = true; // TODO: delete?
     this.idleAsOf = 0.; // TODO: delete? can move once everyone is aboard
     this.goingUp = true;
@@ -323,7 +363,7 @@ function Elevator() {
 
     this.doorIsOpen = true;
     this.aboardCount = 0;
-    this.MAX_ABOARD = 5;
+    this.MAX_ABOARD = MAX_PASSENGERS;
     this.currentlyBoardingCount = 0;
     this.currentlyDepartingCount = 0;
 
@@ -591,12 +631,16 @@ function createNewPerson(currentTime, forceFloor=-1) {
    * Calculates nextArrivalsTime.
    */
   let startingFloor = forceFloor >= 0 ? forceFloor : Math.floor(Math.random()*numFloors);
+  if (queueLengthByFloor[startingFloor] >= MAX_QUEUE_LENGTH) {
+    return;
+  }
   let destinationFloor = -1;
   
   // Appropriately choose random destination
   if (startingFloor > 0) {
     // most likely going to floor zero
-    if (Math.random() < 0.85) {
+    if (Math.random() < 0.95) { // 0.85 resulted in too many going up from non-ground floor.
+      // That caused an ungly buildup of passengers
       destinationFloor = 0;
     } else{
       // random floor different from starting floor
