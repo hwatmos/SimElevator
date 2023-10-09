@@ -123,7 +123,7 @@ const style2 = new PIXI.TextStyle({
 
 const richText = new PIXI.Text('Welcome to my homepage!', style);
 richText.x = 10;
-richText.y = 275;
+richText.y = 375;
 richText.interactive = true;
 richText.on('pointerdown', (event) => { console.log('clicked!'); });
 
@@ -131,7 +131,7 @@ app.stage.addChild(richText);
 
 const richText2 = new PIXI.Text('', style2);
 richText2.x = 10;
-richText2.y = 300;
+richText2.y = 400;
 richText2.interactive = true;
 richText2.on('pointerdown', (event) => { console.log('clicked!'); });
 
@@ -145,7 +145,7 @@ app.stage.addChild(richText2);
  */
 let numFloors = 10;
 let floorZeroX = 200;
-let floorZeroY = 250;
+let floorZeroY = 350;//250;
 let floorHeight = 25;
 let eleWidth = 15;
 
@@ -174,6 +174,7 @@ let MAX_PASSENGERS = 10;
 let MAX_QUEUE_LENGTH = 10; //won't create a new person if adding the person exceeds max
 // queue lengths for that person's starting floor. This helps to keep spillage beyond
 // the building's walls and makes the simulation a bit prettier.
+let DOORS_PER_FLOOR = 3; // 0..3
 
 // #endregion
 /////////////////////////////////////////////////////////////////////////////////
@@ -193,6 +194,7 @@ let stats_aboardCount = new PIXI.Text('Aboard: ' + 0, stat_style);
 stats_aboardCount.x = floorZeroX+120;
 stats_aboardCount.y = floorZeroY - floorHeight * numFloors + floorHeight  ;
 stats_aboardCount.interactive = true;
+stats_aboardCount.visible = false;
 stats_aboardCount.on('pointerdown', (event) => { console.log('clicked!'); });
 
 app.stage.addChild(stats_aboardCount);
@@ -227,6 +229,10 @@ class ElevatorConsole {
       this.buttons[i].sprite = new PIXI.Sprite(this.inactiveButtonTexture);
       this.buttons[i].sprite.x = 5 + col * 20
       this.buttons[i].sprite.y = 5 + (Math.ceil(numFloors/2) - Math.floor(i/2) - 1) * 20
+      this.buttons[i].sprite.visible = true
+      // player can press floor button on the elevator
+      this.buttons[i].sprite.interactive = true;
+      this.buttons[i].sprite.on('pointerdown', (event) => { elev.floorRequests[i] = true; });
       this.sprite.addChild(this.buttons[i].sprite)
     }
     container.addChild(this.sprite);
@@ -266,6 +272,18 @@ class ElevatorConsole {
  floorGraphics.moveTo(floorZeroX+1.5,floorZeroY - (numFloors-1)*floorHeight)
  floorGraphics.lineTo(floorZeroX+1.5,floorZeroY + floorHeight);
  
+
+/**
+ * *Draw doors
+ */
+floorGraphics.beginFill(0x302d40);
+ for (let i = -1; i<9; i++) {
+  for (let j = 0; j<DOORS_PER_FLOOR; j++) {
+    let doorx = floorZeroX+22+j*30;
+    let doory = floorZeroY - (i+1)*floorHeight+7;
+    floorGraphics.drawRect(doorx,doory,10,18);
+  }
+}
  
  container.addChild(floorGraphics);
 
@@ -411,6 +429,14 @@ function Elevator() {
                   console.log(higestRequestedFloor)
                 }
                 else {
+                  this.currentStatus = i > this.curFloor ? 100 : 101;
+                  this.direction = i > this.curFloor ? 1 : -1;
+                }
+              }
+            }
+            if (this.currentStatus == 0) {
+              for (i=numFloors-1; i>=0; i--) {
+                if (elev.floorRequests[i]) {
                   this.currentStatus = i > this.curFloor ? 100 : 101;
                   this.direction = i > this.curFloor ? 1 : -1;
                 }
@@ -742,6 +768,7 @@ class Person {
     this.x = Math.min(floorZeroX - 10 * (queueLengthByFloor[floor] + 1),floorZeroX - Math.random()*80 - 20);
     this.x = this.startingFloor==0 ? 0 : this.x;
     this.y = floorZeroY - floorHeight * floor + 15;
+    this.exitDoorNum = Math.floor(Math.random()*3)
     this.exitDoorXLoc = floorZeroX + (this.destinationFloor==0 ? maxX : Math.random()*95);
     this.currentStatus = 0;
     /**
