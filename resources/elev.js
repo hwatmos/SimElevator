@@ -630,7 +630,13 @@ function createNewPerson(currentTime, forceFloor=-1) {
    * Adds the person to spritesByFloor array.
    * Calculates nextArrivalsTime.
    */
-  let startingFloor = forceFloor >= 0 ? forceFloor : Math.floor(Math.random()*numFloors);
+  let startingFloor = 0;
+  if (forceFloor >=0) {
+    startingFloor = forceFloor;
+  }
+  else {
+    startingFloor = Math.random() >= 0.5 ? startingFloor : Math.floor(Math.random()*numFloors);
+  }
   if (queueLengthByFloor[startingFloor] >= MAX_QUEUE_LENGTH) {
     return;
   }
