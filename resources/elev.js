@@ -121,7 +121,7 @@ const style2 = new PIXI.TextStyle({
   lineJoin: 'round',
 });
 
-const richText = new PIXI.Text('I am Kamil Luto aka 0xhwatmos and this is my homep', style);
+const richText = new PIXI.Text('Welcome to my homepage!', style);
 richText.x = 10;
 richText.y = 275;
 richText.interactive = true;
@@ -129,7 +129,7 @@ richText.on('pointerdown', (event) => { console.log('clicked!'); });
 
 app.stage.addChild(richText);
 
-const richText2 = new PIXI.Text('If the elevator escapes the building... Do not call for help! :)', style2);
+const richText2 = new PIXI.Text('', style2);
 richText2.x = 10;
 richText2.y = 300;
 richText2.interactive = true;
@@ -167,9 +167,9 @@ let queueLengthByFloor = new Array(numFloors).fill(0); // count of Sprites waiti
 // i.e. excludes sprites that are from this floor but are already on elevator
 let idxCountByFloor = new Array(numFloors).fill(0); 
 
-let poissonLambda = 350;//290;
+let poissonLambda = 771;//290;
 
-let SPEED = 5; //10 and above causes moon-shot or hell-ride
+let SPEED = 3; //10 and above causes moon-shot or hell-ride
 let MAX_PASSENGERS = 10;
 let MAX_QUEUE_LENGTH = 10; //won't create a new person if adding the person exceeds max
 // queue lengths for that person's starting floor. This helps to keep spillage beyond
