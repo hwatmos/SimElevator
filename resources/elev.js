@@ -121,7 +121,7 @@ const style2 = new PIXI.TextStyle({
   lineJoin: 'round',
 });
 
-const richText = new PIXI.Text('Welcome to my homepage!', style);
+const richText = new PIXI.Text('My name is Kamil.\nAnd this is my homepage.', style);
 richText.x = 10;
 richText.y = 375;
 richText.interactive = true;
@@ -129,9 +129,17 @@ richText.on('pointerdown', (event) => { console.log('clicked!'); });
 
 app.stage.addChild(richText);
 
-const richText2 = new PIXI.Text('', style2);
+let text_desc = 'It is not mobile-friendly so I advise using your PC to view it.\n\n' +
+  'Above, is a simulation of an elevator I used to ride as a kid.\n'+
+  'The little people are randomly generated.  Each one enters the game with a destination\n' +
+  'in mind.  You can interacting withe the elevator by pressing the buttons on the console.\n' +
+  'But remember, don\'t be a rascal, don\'t press them all at once ;).\n\n' +
+  'Writing simulations is my hobby.  There is something fascinating about creating simulated\n' +
+  'worlds.  And one doesn\'t even need AI to give simulations a little spark of life.\n' +
+  'Check out my GitHub at https://github.com/hwatmos/'
+const richText2 = new PIXI.Text(text_desc, style2);
 richText2.x = 10;
-richText2.y = 400;
+richText2.y = 450;
 richText2.interactive = true;
 richText2.on('pointerdown', (event) => { console.log('clicked!'); });
 
@@ -277,11 +285,12 @@ class ElevatorConsole {
  * *Draw doors
  */
 floorGraphics.beginFill(0x302d40);
- for (let i = -1; i<9; i++) {
+ for (let i = 0; i<9; i++) {
   for (let j = 0; j<DOORS_PER_FLOOR; j++) {
     let doorx = floorZeroX+22+j*30;
     let doory = floorZeroY - (i+1)*floorHeight+7;
     floorGraphics.drawRect(doorx,doory,10,18);
+    floorGraphics.drawRect(- 100 + doorx,doory,10,18);
   }
 }
  
@@ -771,6 +780,8 @@ class Person {
     this.exitDoorNum = Math.floor(Math.random()*3)
     this.exitDoorXLoc = floorZeroX + (this.destinationFloor==0 ? maxX : Math.random()*95);
     this.currentStatus = 0;
+
+    this.movementSpeedModifier = Math.random()*0.6+0.9;
     /**
      * 0   = waiting for the elevator.
      * 1   = in process of boarding the elevator.
@@ -797,7 +808,11 @@ class Person {
             
             // If x-coordinate different from positionInQueue's x-coord, move towards the correct x
             if (this.x < floorZeroX - 10 * (this.positionInQueue + 1)) {
-                this.x += personsMovementSpeed * timeDelta / 60;
+                this.x += this.movementSpeedModifier*personsMovementSpeed * timeDelta / 60;
+                // randomly change speed
+                if (Math.random()>.9) {
+                  this.movementSpeedModifier = Math.random()*0.6+0.9;
+                }
             }
             else if (this.positionInQueue == 0) { // first in queue...
                 if (! this.requestedElevator && !(elev.curFloor == this.startingFloor && elev.currentStatus == 1) || (! floorRequests[this.startingFloor] && elev.curFloor != this.startingFloor)) {
@@ -866,9 +881,13 @@ class Person {
         case 200: // Walking towards "exit" // ! 0909
             // move sprite to the right until reaching exitDoorXLoc
             if (this.x < this.exitDoorXLoc) {
-                this.x += personsMovementSpeed * timeDelta / 60;
+                this.x += this.movementSpeedModifier*personsMovementSpeed * timeDelta / 60;
             } else {
                 this.currentStatus = 999;
+            }
+            // randomly change speed
+            if (Math.random()>.9) {
+              this.movementSpeedModifier = Math.random()*0.6+0.9;
             }
             break;
         case 999: // Awaiting destruction // ! 0909
@@ -901,7 +920,7 @@ class Person {
     this.label.y = -14;
     this.label.interactive = true;
     this.label.on('pointerdown', (event) => { console.log('clicked!'); });
-    this.sprite.addChild(this.label);
+    //this.sprite.addChild(this.label);
 
     container.addChild(this.sprite);
   }
