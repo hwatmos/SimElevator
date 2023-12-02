@@ -1,15 +1,6 @@
 /**
- * *Dev Notes
- * 2022-09-11 - 1.0.1 beta
- * - Door close logic incorrectly handled the case when direction was down, it would
- *   not allow new and only passenger to switch direction to up.
- * 2022-09-11
- * - Finished Person and Elevator logic and finalized working version beta 1.0.0.
- * 2021-11-14
- * - Updated Persons class. The class now adjusts elevator's boarding, departing,
- * and aboard counts so that the elevator knows when it can start closing doors.
- * - Started updating elevator function/class too. Removed closeDoor function. 
- * Next, need to change move() to use currentStatus
+ * *Scratchpad 
+ * 
  */
 
 /////////////////////////////////////////////////////////////////////////////////
