@@ -132,7 +132,7 @@ app.stage.addChild(richText);
 let text_desc = 'It is not mobile-friendly so I advise using your PC to view it.\n\n' +
   'Above, is a simulation of an elevator I used to ride as a kid.\n'+
   'The little people are randomly generated.  Each one enters the game with a destination\n' +
-  'in mind.  You can interacting withe the elevator by pressing the buttons on the console.\n' +
+  'in mind.  You can interact with the elevator by pressing the buttons on the console.\n' +
   'But remember, don\'t be a rascal, don\'t press them all at once ;).\n\n' +
   'Writing simulations is my hobby.  There is something fascinating about creating simulated\n' +
   'worlds.  And one doesn\'t even need AI to give simulations a little spark of life.\n' +
