@@ -177,7 +177,7 @@ let DOORS_PER_FLOOR = 3; // 0..3
 
 // #endregion
 /////////////////////////////////////////////////////////////////////////////////
-//#region Stats
+//#region Dynamic Elements -- Foreground
 /**
  * *Statistics & info
  */
@@ -197,6 +197,10 @@ stats_aboardCount.visible = false;
 stats_aboardCount.on('pointerdown', (event) => { console.log('clicked!'); });
 
 app.stage.addChild(stats_aboardCount);
+
+/**
+ * *Elevator console
+ */
 
 class ElevatorConsole {
   constructor() {
@@ -250,7 +254,7 @@ class ElevatorConsole {
 //do this: if don't close the door right away, instead wait few iterations.  this should help with the current issue
 // #endregion
 /////////////////////////////////////////////////////////////////////////////////
-//#region Static graphics
+//#region Static elements -- Foreground
 /**
  * *Draw floors
  */
