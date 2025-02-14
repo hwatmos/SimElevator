@@ -11,7 +11,7 @@
  * https://stackoverflow.com/questions/1241555/algorithm-to-generate-poisson-and-binomial-random-numbers
  */
 
- function randPoisson(lambda) {
+function randPoisson(lambda) {
   let L = Math.exp(-lambda/SPEED);
   let p = 1.0;
   let k = 0;
@@ -251,48 +251,9 @@ class ElevatorConsole {
     }
   }
 }
-//do this: if don't close the door right away, instead wait few iterations.  this should help with the current issue
-// #endregion
-/////////////////////////////////////////////////////////////////////////////////
-//#region Static elements -- Foreground
-/**
- * *Draw floors
- */
- const floorGraphics = new PIXI.Graphics();
- floorGraphics.lineStyle(1,0xA4969B,1,0.5,false);
- for (let i = -1; i<10; i++) {
-   floorGraphics.moveTo(floorZeroX-100,floorZeroY - i*floorHeight);
-   floorGraphics.lineTo(floorZeroX+100,floorZeroY - i*floorHeight);
- }
- floorGraphics.moveTo(floorZeroX-100,floorZeroY - (numFloors-1)*floorHeight);
- floorGraphics.lineTo(floorZeroX-100,floorZeroY + floorHeight);
- floorGraphics.moveTo(floorZeroX+100,floorZeroY - (numFloors-1)*floorHeight);
- floorGraphics.lineTo(floorZeroX+100,floorZeroY + floorHeight);
- floorGraphics.moveTo(0,floorZeroY + floorHeight);
- floorGraphics.lineTo(maxX,floorZeroY + floorHeight);
- floorGraphics.moveTo(floorZeroX+eleWidth,floorZeroY - (numFloors-1)*floorHeight)
- floorGraphics.lineTo(floorZeroX+eleWidth,floorZeroY + floorHeight);
- floorGraphics.moveTo(floorZeroX+1.5,floorZeroY - (numFloors-1)*floorHeight)
- floorGraphics.lineTo(floorZeroX+1.5,floorZeroY + floorHeight);
- 
 
 /**
- * *Draw doors
- */
-floorGraphics.beginFill(0x302d40);
- for (let i = 0; i<9; i++) {
-  for (let j = 0; j<DOORS_PER_FLOOR; j++) {
-    let doorx = floorZeroX+22+j*30;
-    let doory = floorZeroY - (i+1)*floorHeight+7;
-    floorGraphics.drawRect(doorx,doory,10,18);
-    floorGraphics.drawRect(- 100 + doorx,doory,10,18);
-  }
-}
- 
- container.addChild(floorGraphics);
-
-/**
- * *Floor numbers and buttons
+ * *Floor buttons
  */
 class Floors {
   constructor() {
@@ -334,6 +295,138 @@ class Floors {
           this.buttons[i].sprite.texture = this.inactiveButtonTexture;
         }
       }
+    }
+  }
+}
+
+// #endregion
+/////////////////////////////////////////////////////////////////////////////////
+//#region Static elements -- Foreground
+/**
+ * *Draw floors
+ */
+ const floorGraphics = new PIXI.Graphics();
+ floorGraphics.lineStyle(1,0xA4969B,1,0.5,false);
+ for (let i = -1; i<10; i++) {
+   floorGraphics.moveTo(floorZeroX-100,floorZeroY - i*floorHeight);
+   floorGraphics.lineTo(floorZeroX+100,floorZeroY - i*floorHeight);
+ }
+ floorGraphics.moveTo(floorZeroX-100,floorZeroY - (numFloors-1)*floorHeight);
+ floorGraphics.lineTo(floorZeroX-100,floorZeroY + floorHeight);
+ floorGraphics.moveTo(floorZeroX+100,floorZeroY - (numFloors-1)*floorHeight);
+ floorGraphics.lineTo(floorZeroX+100,floorZeroY + floorHeight);
+ floorGraphics.moveTo(0,floorZeroY + floorHeight);
+ floorGraphics.lineTo(maxX,floorZeroY + floorHeight);
+ floorGraphics.moveTo(floorZeroX+eleWidth,floorZeroY - (numFloors-1)*floorHeight)
+ floorGraphics.lineTo(floorZeroX+eleWidth,floorZeroY + floorHeight);
+ floorGraphics.moveTo(floorZeroX+1.5,floorZeroY - (numFloors-1)*floorHeight)
+ floorGraphics.lineTo(floorZeroX+1.5,floorZeroY + floorHeight);
+ 
+
+/**
+ * *Draw doors
+ */
+floorGraphics.beginFill(0x302d40);
+ for (let i = 0; i<9; i++) {
+  for (let j = 0; j<DOORS_PER_FLOOR; j++) {
+    let doorx = floorZeroX+22+j*30;
+    let doory = floorZeroY - (i+1)*floorHeight+7;
+    floorGraphics.drawRect(doorx,doory,10,18);
+    floorGraphics.drawRect(- 100 + doorx,doory,10,18);
+  }
+}
+ 
+ container.addChild(floorGraphics);
+
+// #endregion
+/////////////////////////////////////////////////////////////////////////////////
+//#region Dynamic Elements -- Background
+/**
+ * *Draw background buildings
+ */
+windowBrightGraphic = new PIXI.Graphics();
+windowBrightGraphic.lineStyle(1,0xffffff,1,0.5,false);
+windowBrightGraphic.beginFill(0xffffff);
+windowBrightGraphic.drawRect(-3,-4,6,8);
+windowBrightGraphic.endFill();
+windowBrightTexture = app.renderer.generateTexture(windowBrightGraphic);
+
+windowDarkGraphic = new PIXI.Graphics();
+windowDarkGraphic.lineStyle(1,0x2b264d,1,0.5,false);
+windowDarkGraphic.beginFill(0x000);
+windowDarkGraphic.drawRect(-3,-4,6,8);
+windowDarkGraphic.endFill();
+windowDarkTexture = app.renderer.generateTexture(windowDarkGraphic);
+
+function createXmasTexture()
+{
+    // adjust it if somehow you need better quality for very very big images
+    const quality = 8;
+    const canvas = document.createElement('canvas');
+    canvas.width = 8;
+    canvas.height = 10;
+    const ctx = canvas.getContext('2d');
+    // use canvas2d API to create gradient
+    const grd = ctx.createLinearGradient(0, 0, quality, 0);
+    grd.addColorStop(0, 'red');
+    grd.addColorStop(0.8, 'green');
+
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, quality, 10);
+    //ctx.lineStyle(1,0xffffff,1,0.5,false);
+    //ctx.drawRect(-3,-4,6,8);
+
+    return PIXI.Texture.from(canvas);
+}
+
+const windowXmasTexture = createXmasTexture();
+
+class BackgroundWindowXmas {
+  constructor() {
+    this.isBright = true;
+    this.windowGlass = new PIXI.Sprite(windowXmasTexture);
+    this.x = 400 + 20*3;
+    this.y = 300 + (Math.ceil(10/7) - Math.floor(17/7) -1) * 20;
+    this.windowGlass.x = this.x;
+    this.windowGlass.y = this.y;
+
+    this.windowGlass.interactive = true;
+    this.windowGlass.on('pointertap', (event) => { 
+      alert("You found me!  The word is: Empathetic!")
+    });
+
+    container.addChild(this.windowGlass);
+  }
+}
+
+class BackgroundWindow {
+  constructor(locX,locY,bright) {
+    this.isBright = bright;
+    this.windowGlass = new PIXI.Sprite(this.isBright ? windowBrightTexture : windowDarkTexture);
+    this.windowGlass.x = locX;
+    this.windowGlass.y = locY;
+
+    this.windowGlass.interactive = true;
+    this.windowGlass.on('pointertap', (event) => { 
+      this.isBright = ! this.isBright;
+      this.windowGlass.texture = this.isBright ? windowBrightTexture : windowDarkTexture;
+    });
+
+    container.addChild(this.windowGlass);
+  }
+}
+
+class BackgroundBuilding {
+  constructor(buildX,buildY) {
+    this.windows = new Array(70);
+    this.col = 0;
+    for (let i=69; i>=0; i--) {
+      this.brightWindow = Math.random()>0.8 ? 1 : 0;
+      this.x = buildX + 20*this.col;
+      this.y = buildY + (Math.ceil(10/7) - Math.floor(i/7) -1) * 20;
+      this.windows[i] = new BackgroundWindow(this.x,this.y,this.brightWindow);
+      this.col += 1;
+      this.col = this.col>6 ? 0 : this.col;
     }
   }
 }
@@ -901,13 +994,16 @@ class Person {
     this.graphic = new PIXI.Graphics();
     this.graphic.beginFill(this.color);
     this.graphic.lineStyle(0);
-    this.graphic.drawCircle(0, 0, 2);
+    this.pers_height = 3 + 2 * Math.random();
+    this.graphic.drawCircle(0, -this.pers_height, 2);
+    this.graphic.drawEllipse(0,5 - this.pers_height,1 + Math.random(),this.pers_height);
     this.graphic.endFill();
 
     this.texture = app.renderer.generateTexture(this.graphic);
     this.sprite = new PIXI.Sprite(this.texture);
     this.sprite.x = this.x;
     this.sprite.y = this.y;
+    this.sprite.anchor.set(0,0.5);
 
     // Label person with their destination floor
     this.label = new PIXI.Text(this.destinationFloor, stat_style);
@@ -927,6 +1023,11 @@ class Person {
 elev = new Elevator();
 elevConsole = new ElevatorConsole();
 floors = new Floors();
+//testWindow = new BackgroundWindow();
+bgBuilding1 = new BackgroundBuilding(400,300);
+bgBuilding2 = new BackgroundBuilding(500,260)
+bgBuilding2 = new BackgroundBuilding(620,320)
+xmasWindow = new BackgroundWindowXmas();
 
 app.stage.addChild(container);
 /**
