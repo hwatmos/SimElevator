@@ -169,7 +169,7 @@ let idxCountByFloor = new Array(numFloors).fill(0);
 let poissonLambda = 333;//771;//290;
 
 let SPEED = 3; //10 and above causes moon-shot or hell-ride
-let MAX_PASSENGERS = 10;
+let MAX_PASSENGERS = 6;
 let MAX_QUEUE_LENGTH = 10; //won't create a new person if adding the person exceeds max
 // queue lengths for that person's starting floor. This helps to keep spillage beyond
 // the building's walls and makes the simulation a bit prettier.
@@ -582,7 +582,7 @@ function Elevator() {
                 if (i == this.curFloor) {
                   this.currentStatus = 200;
                   cancelElevatorRequest(this.curFloor);
-                  console.log(higestRequestedFloor)
+                  //console.log(higestRequestedFloor)
                 }
                 else {
                   this.currentStatus = i > this.curFloor ? 100 : 101;
@@ -865,7 +865,7 @@ function requestElevator(floor) {
    */
   if (!floorRequests[floor] && floor!=null) {
     floorRequests[floor] = true;
-    console.log('Requested elevator on floor '+floor);
+    //console.log('Requested elevator on floor '+floor);
 
     higestRequestedFloor = -1;
     for (i=numFloors-1; i>=0; i--) {
@@ -1156,8 +1156,8 @@ app.ticker.add((delta) => {
     elev.move(delta, elapsed);
 
     if (elevatorsLastStatus != elev.currentStatus) {
-      console.log("*** Elevator's status changed to " + elev.currentStatus);
-      console.log(elev);  
+      //console.log("*** Elevator's status changed to " + elev.currentStatus);
+      //console.log(elev);  
       //console.log("aboard: " + elev.aboardCount);
       elevatorsLastStatus = elev.currentStatus;
     }
