@@ -420,47 +420,6 @@ windowDarkGraphic.drawRect(-3,-4,6,8);
 windowDarkGraphic.endFill();
 windowDarkTexture = app.renderer.generateTexture(windowDarkGraphic);
 
-function createXmasTexture()
-{
-    // adjust it if somehow you need better quality for very very big images
-    const quality = 8;
-    const canvas = document.createElement('canvas');
-    canvas.width = 8;
-    canvas.height = 10;
-    const ctx = canvas.getContext('2d');
-    // use canvas2d API to create gradient
-    const grd = ctx.createLinearGradient(0, 0, quality, 0);
-    grd.addColorStop(0, 'red');
-    grd.addColorStop(0.8, 'green');
-
-    ctx.fillStyle = grd;
-    ctx.fillRect(0, 0, quality, 10);
-    //ctx.lineStyle(1,0xffffff,1,0.5,false);
-    //ctx.drawRect(-3,-4,6,8);
-
-    return PIXI.Texture.from(canvas);
-}
-
-const windowXmasTexture = createXmasTexture();
-
-class BackgroundWindowXmas {
-  constructor() {
-    this.isBright = true;
-    this.windowGlass = new PIXI.Sprite(windowXmasTexture);
-    this.x = 400 + 20*3;
-    this.y = 300 + (Math.ceil(10/7) - Math.floor(17/7) -1) * 20;
-    this.windowGlass.x = this.x;
-    this.windowGlass.y = this.y;
-
-    this.windowGlass.interactive = true;
-    this.windowGlass.on('pointertap', (event) => { 
-      alert("You found me!  The word is: Empathetic!")
-    });
-
-    container.addChild(this.windowGlass);
-  }
-}
-
 class BackgroundWindow {
   constructor(locX,locY,bright) {
     this.isBright = bright;
@@ -1112,10 +1071,7 @@ elev = new Elevator();
 elevConsole = new ElevatorConsole();
 floors = new Floors();
 //testWindow = new BackgroundWindow();
-bgBuilding1 = new BackgroundBuilding(400,300);
-bgBuilding2 = new BackgroundBuilding(500,260)
-bgBuilding2 = new BackgroundBuilding(620,320)
-xmasWindow = new BackgroundWindowXmas();
+bgBuilding3 = new BackgroundBuilding(620,320,0)
 sprite_status = new SpriteStatusBox();
 elevator_status = new ElevatorStatusBox(elev);
 
