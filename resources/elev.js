@@ -299,6 +299,33 @@ class Floors {
   }
 }
 
+/**
+ * *Sprite stats
+ */
+class SpriteStatusBox {
+  constructor() {
+    this.sprite_ref;
+    const style_sprite_status_text = new PIXI.TextStyle({
+      fontFamily: 'Courier New',
+      fontSize: 13,
+      fontStyle: 'italic',
+      fill: '#33ff00',
+      strokeThickness: 0,
+      lineJoin: 'round',
+    });
+    this.statusText = new PIXI.Text("Click a sprite to view their current properties",style_sprite_status_text);
+    this.statusText.x = 5;
+    this.statusText.y = 5;
+    app.stage.addChild(this.statusText);
+
+    this.update = function () {
+      if (this.sprite_ref != null) {
+        this.statusText.text = this.sprite_ref.currentStatus;
+      }
+    }
+  }
+}
+
 // #endregion
 /////////////////////////////////////////////////////////////////////////////////
 //#region Static elements -- Foreground
@@ -1012,6 +1039,14 @@ class Person {
     this.label.on('pointerdown', (event) => { console.log('clicked!'); });
     //this.sprite.addChild(this.label);
 
+    // Interactivity
+    this.sprite.interactive = true;
+    this.sprite.on('pointerdown', (event) =>  {
+      if (sprite_status.sprite_ref != null) {sprite_status.sprite_ref.sprite.tint =  0xFFFFFF;}
+      sprite_status.sprite_ref = this; 
+      this.sprite.tint = 0xff0000;
+    })
+
     container.addChild(this.sprite);
   }
 }
@@ -1027,6 +1062,7 @@ bgBuilding1 = new BackgroundBuilding(400,300);
 bgBuilding2 = new BackgroundBuilding(500,260)
 bgBuilding2 = new BackgroundBuilding(620,320)
 xmasWindow = new BackgroundWindowXmas();
+sprite_status = new SpriteStatusBox();
 
 app.stage.addChild(container);
 /**
@@ -1075,8 +1111,10 @@ app.ticker.add((delta) => {
 
     stats_aboardCount.text = 'Aboard: ' + elev.aboardCount;
 
+    // Redraw other elements
     elevConsole.update();
     floors.update();
+    sprite_status.update()
 
 });
 //#endregion
