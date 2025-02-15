@@ -114,7 +114,7 @@ const style2 = new PIXI.TextStyle({
 
 const richText = new PIXI.Text('My name is Kamil.\nAnd this is my homepage.', style);
 richText.x = 10;
-richText.y = 375;
+richText.y = 395;//375;
 richText.interactive = true;
 richText.on('pointerdown', (event) => { console.log('clicked!'); });
 
@@ -130,7 +130,7 @@ let text_desc = 'It is not mobile-friendly so I advise using your PC to view it.
   'Check out my GitHub at https://github.com/hwatmos/'
 const richText2 = new PIXI.Text(text_desc, style2);
 richText2.x = 10;
-richText2.y = 450;
+richText2.y = 470;//450;
 richText2.interactive = true;
 richText2.on('pointerdown', (event) => { console.log('clicked!'); });
 
@@ -315,12 +315,14 @@ class SpriteStatusBox {
     });
     this.statusText = new PIXI.Text("Click a sprite to view their current properties",style_sprite_status_text);
     this.statusText.x = 5;
-    this.statusText.y = 5;
+    this.statusText.y = 375;
     app.stage.addChild(this.statusText);
 
     this.update = function () {
       if (this.sprite_ref != null) {
-        this.statusText.text = this.sprite_ref.currentStatus;
+        this.statusText.text = "Status: " + this.sprite_ref.currentStatus +
+        ", Queue: " + this.sprite_ref.positionInQueue +
+        ", Dest: " + this.sprite_ref.destinationFloor;
       }
     }
   }
