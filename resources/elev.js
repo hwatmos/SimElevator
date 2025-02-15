@@ -909,7 +909,7 @@ class Person {
      * 999 = awaiting destruction.
      */
     this.positionInQueue = queueLengthByFloor[floor] + 1;
-    queueLengthByFloor[floor] ++;
+    this.enteredQueue = false;
     queuePositionsByFloor[this.startingFloor][this.positionInQueue] = true;
 
     this.destroy = function () {
@@ -929,6 +929,14 @@ class Person {
               queuePositionsByFloor[this.startingFloor][this.positionInQueue] = false;
               this.positionInQueue -- ;
               queuePositionsByFloor[this.startingFloor][this.positionInQueue] = true;
+            }
+
+            // If close enough to their place in queue, consider this sprite to be in the queue
+            if (this.x >= floorZeroX - 10 * (this.positionInQueue + 1) - 30) {
+              if (! this.enteredQueue) {
+                queueLengthByFloor[this.startingFloor] ++;
+                this.enteredQueue = true;
+              }
             }
             
             // If x-coordinate different from positionInQueue's x-coord, move towards the correct x
