@@ -923,6 +923,13 @@ class Person {
       }
       switch (this.currentStatus) {
         case 0: // Waiting for an elevator // ! 0909
+            // Adjust position in queue
+            if (queuePositionsByFloor[this.startingFloor][this.positionInQueue-1] == false) {
+              // if space to the right freed up, move right
+              queuePositionsByFloor[this.startingFloor][this.positionInQueue] = false;
+              this.positionInQueue -- ;
+              queuePositionsByFloor[this.startingFloor][this.positionInQueue] = true;
+            }
             
             // If x-coordinate different from positionInQueue's x-coord, move towards the correct x
             if (this.x < floorZeroX - 10 * (this.positionInQueue + 1)) {
@@ -952,11 +959,6 @@ class Person {
                         }
                     }
                 }
-            } else if (queuePositionsByFloor[this.startingFloor][this.positionInQueue-1] == false) {
-                // if space to the right freed up, move right
-                queuePositionsByFloor[this.startingFloor][this.positionInQueue] = false;
-                this.positionInQueue -- ;
-                queuePositionsByFloor[this.startingFloor][this.positionInQueue] = true;
             }
             break;
 
