@@ -114,7 +114,7 @@ const style2 = new PIXI.TextStyle({
 
 const richText = new PIXI.Text('My name is Kamil.\nAnd this is my homepage.', style);
 richText.x = 10;
-richText.y = 395;//375;
+richText.y = 410;//375;
 richText.interactive = true;
 richText.on('pointerdown', (event) => { console.log('clicked!'); });
 
@@ -166,7 +166,7 @@ let queueLengthByFloor = new Array(numFloors).fill(0); // count of Sprites waiti
 // i.e. excludes sprites that are from this floor but are already on elevator
 let idxCountByFloor = new Array(numFloors).fill(0); 
 
-let poissonLambda = 150;//771;//290;
+let poissonLambda = 333;//771;//290;
 
 let SPEED = 3; //10 and above causes moon-shot or hell-ride
 let MAX_PASSENGERS = 10;
@@ -314,15 +314,48 @@ class SpriteStatusBox {
       lineJoin: 'round',
     });
     this.statusText = new PIXI.Text("Click a sprite to view their current properties",style_sprite_status_text);
-    this.statusText.x = 5;
+    this.statusText.x = 10;
     this.statusText.y = 375;
     app.stage.addChild(this.statusText);
 
     this.update = function () {
       if (this.sprite_ref != null) {
         this.statusText.text = "Status: " + this.sprite_ref.currentStatus +
-        ", Queue: " + this.sprite_ref.positionInQueue +
-        ", Dest: " + this.sprite_ref.destinationFloor;
+        ", Queue: " + (this.sprite_ref.enteredQueue ? this.sprite_ref.positionInQueue : "not yet") +
+        ", Dest: " + this.sprite_ref.destinationFloor +
+        (this.sprite_ref.holdingDoor ? ", holding door" : "");
+      }
+    }
+  }
+}
+
+/**
+ * *Elevator stats
+ */
+class ElevatorStatusBox {
+  constructor(elev) {
+    this.elev_ref = elev;
+    const style_elev_status_text = new PIXI.TextStyle({
+      fontFamily: 'Courier New',
+      fontSize: 13,
+      fontStyle: 'italic',
+      fill: '#33ff00',
+      strokeThickness: 0,
+      lineJoin: 'round',
+    });
+    this.statusText = new PIXI.Text("",style_elev_status_text);
+    this.statusText.x = 10;
+    this.statusText.y = 390;
+    app.stage.addChild(this.statusText);
+
+    this.update = function () {
+      if (this.elev_ref != null) {
+        this.statusText.text = "Status: " + this.elev_ref.currentStatus +
+        (this.elev_ref.currentStatus == 100 ? ", Going up" : "") +
+        (this.elev_ref.currentStatus == 101 ? ", Going dn" : "") +
+        ", Aboard: " + this.elev_ref.aboardCount + 
+        (this.elev_ref.holdingDoor ? ", Door blocked" : "")
+        ;
       }
     }
   }
@@ -894,6 +927,7 @@ class Person {
     this.exitDoorNum = Math.floor(Math.random()*3)
     this.exitDoorXLoc = floorZeroX + (this.destinationFloor==0 ? maxX : Math.random()*95);
     this.currentStatus = 0;
+    this.holdingDoor = false; // not needed for the logic but used for displaying sprite status
 
     this.movementSpeedModifier = Math.random()*0.6+0.9;
     /**
@@ -905,7 +939,7 @@ class Person {
      * 999 = awaiting destruction.
      */
     this.positionInQueue = queueLengthByFloor[floor] + 1;
-    this.enteredQueue = false;
+    this.enteredQueue = false; // false indicates that this sprite is still walking towards the queue
     queuePositionsByFloor[this.startingFloor][this.positionInQueue] = true;
 
     this.destroy = function () {
@@ -984,8 +1018,10 @@ class Person {
             if (elev.currentStatus == 1) {
               if (elev.aboardCount < MAX_PASSENGERS & queueLengthByFloor[elev.curFloor] > 0) {
                 elev.holdingDoor = true;
+                this.holdingDoor = true;
               } else {
                 elev.holdingDoor = false;
+                this.holdingDoor = false;
               }
             }
             // Arrived at the destination floor?
@@ -1081,6 +1117,7 @@ bgBuilding2 = new BackgroundBuilding(500,260)
 bgBuilding2 = new BackgroundBuilding(620,320)
 xmasWindow = new BackgroundWindowXmas();
 sprite_status = new SpriteStatusBox();
+elevator_status = new ElevatorStatusBox(elev);
 
 app.stage.addChild(container);
 /**
@@ -1132,7 +1169,8 @@ app.ticker.add((delta) => {
     // Redraw other elements
     elevConsole.update();
     floors.update();
-    sprite_status.update()
+    sprite_status.update();
+    elevator_status.update();
 
 });
 //#endregion
