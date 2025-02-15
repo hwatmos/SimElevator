@@ -478,7 +478,6 @@ function Elevator() {
 
     this.doorIsOpen = true;
     this.aboardCount = 0;
-    this.MAX_ABOARD = MAX_PASSENGERS;
     this.currentlyBoardingCount = 0;
     this.currentlyDepartingCount = 0;
 
@@ -912,7 +911,7 @@ class Person {
                         // if going in the same direction as the elevator, board
                         // or if elevator is empty, board
                         if (elev.aboardCount==0 || elev.direction*this.direction >= 0) {
-                          if (elev.aboardCount < elev.MAX_ABOARD) {
+                          if (elev.aboardCount < MAX_PASSENGERS) {
                             elev.currentlyBoardingCount ++;
                             this.currentStatus = 1;
                             queuePositionsByFloor[this.startingFloor][this.positionInQueue] = false;
