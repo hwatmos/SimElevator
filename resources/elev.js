@@ -513,6 +513,8 @@ function Elevator() {
     this.floorRequests = new Array(numFloors).fill(false);
     this.higestRequestedFloor = -1;
 
+    this.holdingDoor = false; // sprites can hold the door if there is more room on the elev and more sprites on the floor
+
     this.currentStatus = 0;
     /**
      * 0   = idle i.e. standing, no passengers (and the door is open);
@@ -571,7 +573,7 @@ function Elevator() {
 
           case 1: // door is open, passengers are boarding and exiting
             if (this.currentlyBoardingCount == 0 && this.currentlyDepartingCount == 0) {
-              if (this.doorCloseDelay >= 6) {
+              if (this.doorCloseDelay >= 6 & !this.holdingDoor) {
                 this.currentStatus = 300;
                 this.doorCloseDelay = 0;
               } else {
@@ -972,6 +974,14 @@ class Person {
             break;
 
         case 100: // Aboard the elevator // ! 0909
+            // If the elevator is still boarding, hold the door if there is still room
+            if (elev.currentStatus == 1) {
+              if (elev.aboardCount < MAX_PASSENGERS & queueLengthByFloor[elev.curFloor] > 0) {
+                elev.holdingDoor = true;
+              } else {
+                elev.holdingDoor = false;
+              }
+            }
             // Arrived at the destination floor?
             if (elev.curFloor == this.destinationFloor) {
                 if (elev.currentStatus==1) {
