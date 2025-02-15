@@ -494,10 +494,7 @@ function elevYToFloorIfSafe(y) {
 function Elevator() {
 
     this.curFloor = 0;
-    this.nextFloor = 0; // TODO: delete?
     this.movSpeed = 1.5 * SPEED; // value of one gave me about 1 second per floor
-    this.idle = true; // TODO: delete?
-    this.idleAsOf = 0.; // TODO: delete? can move once everyone is aboard
     this.goingUp = true;
     this.direction = 0; // 0 = no direction; 1 = up; -1 = down
 
@@ -505,7 +502,6 @@ function Elevator() {
 
     this.doorCloseDelay = 0;
 
-    this.doorIsOpen = true;
     this.aboardCount = 0;
     this.currentlyBoardingCount = 0;
     this.currentlyDepartingCount = 0;
