@@ -421,7 +421,9 @@ windowDarkGraphic.endFill();
 windowDarkTexture = app.renderer.generateTexture(windowDarkGraphic);
 
 class BackgroundWindow {
-  constructor(locX,locY,bright) {
+  constructor(locX,locY,bright,elapsed) {
+    this.poissonLamba = Math.random()*5000+500;
+    this.nextLightSwitchTime = elapsed + Math.random()*500000;//randPoisson(this.poissonLamba);
     this.isBright = bright;
     this.windowGlass = new PIXI.Sprite(this.isBright ? windowBrightTexture : windowDarkTexture);
     this.windowGlass.x = locX;
@@ -432,22 +434,33 @@ class BackgroundWindow {
       this.isBright = ! this.isBright;
       this.windowGlass.texture = this.isBright ? windowBrightTexture : windowDarkTexture;
     });
+  this.update = function(elapsed) {
+    if (elapsed >= this.nextLightSwitchTime) {
+      console.log("Switch light")
+      this.isBright = ! this.isBright;
+      this.windowGlass.texture = this.isBright ? windowBrightTexture : windowDarkTexture;
+      this.nextLightSwitchTime = elapsed + Math.random()*5000+500;//randPoisson(this.poissonLamba);
+    }
+  }
 
     container.addChild(this.windowGlass);
   }
 }
 
 class BackgroundBuilding {
-  constructor(buildX,buildY) {
+  constructor(buildX,buildY,elapsed) {
     this.windows = new Array(70);
     this.col = 0;
     for (let i=69; i>=0; i--) {
       this.brightWindow = Math.random()>0.8 ? 1 : 0;
       this.x = buildX + 20*this.col;
       this.y = buildY + (Math.ceil(10/7) - Math.floor(i/7) -1) * 20;
-      this.windows[i] = new BackgroundWindow(this.x,this.y,this.brightWindow);
+      this.windows[i] = new BackgroundWindow(this.x,this.y,this.brightWindow,elapsed);
       this.col += 1;
       this.col = this.col>6 ? 0 : this.col;
+    }
+    this.update = function(elapsed) {
+      this.windows.forEach(win => win.update(elapsed))
     }
   }
 }
@@ -1071,6 +1084,8 @@ elev = new Elevator();
 elevConsole = new ElevatorConsole();
 floors = new Floors();
 //testWindow = new BackgroundWindow();
+bgBuilding1 = new BackgroundBuilding(400,300,0);
+bgBuilding2 = new BackgroundBuilding(500,260,0)
 bgBuilding3 = new BackgroundBuilding(620,320,0)
 sprite_status = new SpriteStatusBox();
 elevator_status = new ElevatorStatusBox(elev);
@@ -1127,6 +1142,9 @@ app.ticker.add((delta) => {
     floors.update();
     sprite_status.update();
     elevator_status.update();
+    bgBuilding1.update(elapsed);
+    bgBuilding2.update(elapsed);
+    bgBuilding3.update(elapsed);
 
 });
 //#endregion
