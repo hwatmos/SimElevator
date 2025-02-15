@@ -166,7 +166,7 @@ let queueLengthByFloor = new Array(numFloors).fill(0); // count of Sprites waiti
 // i.e. excludes sprites that are from this floor but are already on elevator
 let idxCountByFloor = new Array(numFloors).fill(0); 
 
-let poissonLambda = 771;//290;
+let poissonLambda = 150;//771;//290;
 
 let SPEED = 3; //10 and above causes moon-shot or hell-ride
 let MAX_PASSENGERS = 10;
