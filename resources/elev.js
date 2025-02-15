@@ -948,7 +948,7 @@ class Person {
                     if (elev.currentStatus==1) {
                         // if going in the same direction as the elevator, board
                         // or if elevator is empty, board
-                        if (elev.aboardCount==0 || elev.direction*this.direction >= 0) {
+                        //if (elev.aboardCount==0 || elev.direction*this.direction >= 0) { // Unnecessary with the current approach where sprite queue is like a stack b/c sprites can't skip line.  So, waiting until elev. is going in the correct direction blocks all sprites behind
                           if (elev.aboardCount < MAX_PASSENGERS) {
                             elev.currentlyBoardingCount ++;
                             this.currentStatus = 1;
@@ -956,7 +956,7 @@ class Person {
                             this.positionInQueue = -1;
                             queueLengthByFloor[this.startingFloor] --;
                           }
-                        }
+                        //}
                     }
                 }
             }
