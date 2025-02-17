@@ -178,7 +178,7 @@ let DOORS_PER_FLOOR = 3; // 0..3
 
 // #endregion
 /////////////////////////////////////////////////////////////////////////////////
-//#region Dynamic Elements -- Foreground
+//#region Dynamic Foreground
 /**
  * *Statistics & info
  */
@@ -209,7 +209,7 @@ class ElevatorConsole {
     let colorPalette = [0xafc9ff, 0xc7d8ff, 0xfff4f3, 0xffe5cf, 0xffd9b2, 0xffffff, 0xffa651];
     this.graphic = new PIXI.Graphics();
     this.graphic.lineStyle(1,0xafc9ff,1,0.5,false);
-    this.graphic.drawRoundedRect(0,0,44,numFloors/2*20 + 5,2);
+    this.graphic.drawRoundedRect(0,0,44,Math.ceil(numFloors/2)*20 + 5,2);
     this.texture = app.renderer.generateTexture(this.graphic);
     this.sprite = new PIXI.Sprite(this.texture);
     this.sprite.x = floorZeroX+120;
