@@ -266,7 +266,7 @@ class Floors {
     this.texture = app.renderer.generateTexture(this.graphic);
     this.sprite = new PIXI.Sprite();
     this.sprite.x = floorZeroX-3;
-    this.sprite.y = floorZeroY-(numFloors)*floorHeight + 15;
+    this.sprite.y = floorZeroY+15;
     // Buttons
     this.buttons = new Array(numFloors);
     this.activeButtonGraphic = new PIXI.Graphics();
@@ -283,7 +283,7 @@ class Floors {
       this.buttons[i] = new Object;
       this.buttons[i].sprite = new PIXI.Sprite(this.inactiveButtonTexture);
       this.buttons[i].sprite.x = 0
-      this.buttons[i].sprite.y = (10 - i) * floorHeight
+      this.buttons[i].sprite.y = -(i) * floorHeight
       this.sprite.addChild(this.buttons[i].sprite)
     }
     container.addChild(this.sprite);
@@ -364,13 +364,13 @@ class ElevatorStatusBox {
 
 // #endregion
 /////////////////////////////////////////////////////////////////////////////////
-//#region Static elements -- Foreground
+//#region Static Foreground
 /**
  * *Draw floors
  */
  const floorGraphics = new PIXI.Graphics();
  floorGraphics.lineStyle(1,0xA4969B,1,0.5,false);
- for (let i = -1; i<10; i++) {
+ for (let i = -1; i<numFloors; i++) {
    floorGraphics.moveTo(floorZeroX-100,floorZeroY - i*floorHeight);
    floorGraphics.lineTo(floorZeroX+100,floorZeroY - i*floorHeight);
  }
@@ -390,7 +390,7 @@ class ElevatorStatusBox {
  * *Draw doors
  */
 floorGraphics.beginFill(0x302d40);
- for (let i = 0; i<9; i++) {
+ for (let i = 0; i<numFloors-1; i++) {
   for (let j = 0; j<DOORS_PER_FLOOR; j++) {
     let doorx = floorZeroX+22+j*30;
     let doory = floorZeroY - (i+1)*floorHeight+7;
@@ -403,7 +403,7 @@ floorGraphics.beginFill(0x302d40);
 
 // #endregion
 /////////////////////////////////////////////////////////////////////////////////
-//#region Dynamic Elements -- Background
+//#region Dynamic Background
 /**
  * *Draw background buildings
  */
