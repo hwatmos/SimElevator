@@ -169,6 +169,7 @@ let idxCountByFloor = new Array(numFloors).fill(0);
 let poissonLambda = 333;//771;//290;
 
 let SPEED = 3; //10 and above causes moon-shot or hell-ride
+let ELEV_SPEED = .5;
 let MAX_PASSENGERS = 6;
 let MAX_QUEUE_LENGTH = 10; //won't create a new person if adding the person exceeds max
 // queue lengths for that person's starting floor. This helps to keep spillage beyond
@@ -499,7 +500,7 @@ function elevYToFloorIfSafe(y) {
 function Elevator() {
 
     this.curFloor = 0;
-    this.movSpeed = 1.5 * SPEED; // value of one gave me about 1 second per floor
+    this.movSpeed = ELEV_SPEED * SPEED; // value of one gave me about 1 second per floor
     this.goingUp = true;
     this.direction = 0; // 0 = no direction; 1 = up; -1 = down
 
