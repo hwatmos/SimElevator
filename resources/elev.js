@@ -549,6 +549,14 @@ function Elevator() {
     this.move = function(timeDelta, time) {
         switch (this.currentStatus) {
           case 0: // idle & door is closed
+            // clear requests for the current floor
+            console.log('100 at floor ' + this.curFloor);
+            if (this.curFloor > -1) {
+              if (this.floorRequests[this.curFloor]) {
+                this.cancelElevatorRequest(this.curFloor);
+                console.log('Canceling ' + this.curFloor);
+              }
+            }
             // check for floor requests
             for (i=numFloors-1; i>=0; i--) {
               if (floorRequests[i]) {
