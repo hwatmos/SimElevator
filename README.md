@@ -1,53 +1,13 @@
 # SimElevator
-Simulation of an elevator and its passengers.
 
-![Video of a elevator simulator](docs/simElevator01.gif)
+Simulation of an elevator and its passengers, written with PixiJS. Visit my website to view live demo at https://kamilluto.com/. 
 
-## Issues
+![Video of the elevator simulator](docs/simElevator01.gif)
 
-- Sometimes sims wait for the elevator, i.e. have status 0 but the global floor request for that floor is false.  Elevator will only pick them up if another sim goes to that floor.
-  - Fix added, need to test more to see if it work properly (added delay before closing door to allow additional iterations and sims to begin boarding).
-- Sometimes when picking sims from the highest floor and going down, it seems that the button is still on on that floor.
+## Description
 
-# API
+This code aims to simulate a real-world elevator and its passenger by treating the elevator and the passengers as individual entities. This means that the elevator's movement logic should be completely independent of the passengers present in the game. To accomplish this, the elevator and each passenger are controlled by their individual state. The passengers can request the elevator by pressing a button and the elevator is able to see where the floor has been requested. The passengers can also hold the door to stop the elevator from departing (although the elevator has still two properties, currentlyBoardingCount and currentlyDepartingCount, which must be eliminated).
 
-This documentation still needs more work. The following is a cheatsheet used during development process.
+## Current Development
 
-## Global
-
-* floorZeroX - location of the center of the elevator
-* personsMovementSpeed
-* passengers - unused?
-* spritesByFloor[startingFloor] - newly created sprites appended here
-* numFloors
-* floorHeight
-* higestRequestedFloor
-
-## Person
-
-* startingFLoor
-* destinationFLoor
-* x
-* y
-* exitDoorXLoc
-* currentStatus
-* positionInQueue
-  * -1 if on the elevator
-
-## Floor
-
-* queueLengthByFloor[floor] - int
-* queuePositionsByFloor[floor][position_in_queue] - bool
-* floorRequests[floor] - bool
-
-## Elevator#
-
-* goingUp
-* curFloor
-* doorIsOpen
-* currentlyBoardingCount
-* currentlyDepartingCount
-* aboardCount
-* currentStatus
-* floorRequests
-* higestRequestedFloor
+I'm currently transitioning all code to PixiJS 8 and implementing modularity using Parcel. I'm expecting this to be complete by the end of Feb 2025. Commits won't be happening until I get a good working base code in Parcel.
