@@ -61,7 +61,7 @@ class ElevatorConsole {
     }
 }
 
-class Floors {
+class HallButtons {
     // The buttons used to call the eleveator, one on each floor
     constructor(app, container) {
         // Initiate sprite
@@ -69,20 +69,14 @@ class Floors {
         //this.graphic.lineStyle(1,0xafc9ff,1,0.5,false);
         this.graphic.roundRect(0,0,44,numFloors/2*20 + 5,2);
         this.texture = app.renderer.generateTexture(this.graphic);
-        this.sprite = new PIXI.Sprite();
+        this.sprite = new PIXI.Container();
         this.sprite.x = floorZeroX-3;
         this.sprite.y = floorZeroY+15;
         // Buttons
         this.buttons = new Array(numFloors);
-        this.activeButtonGraphic = new PIXI.Graphics();
-        //this.activeButtonGraphic.lineStyle(1,0xffffff,1,0.5,false);
-        this.activeButtonGraphic.beginFill(0xffffff);
-        this.activeButtonGraphic.drawCircle(0,0,.5)
-        this.activeButtonGraphic.endFill();
+        this.activeButtonGraphic = new PIXI.Graphics().circle(0,0,.5).fill(0xffffff).stroke(0xffffff);
         this.activeButtonTexture = app.renderer.generateTexture(this.activeButtonGraphic);
-        this.inactiveButtonGraphic = new PIXI.Graphics();
-        //this.inactiveButtonGraphic.lineStyle(1,0x3d3b49,1,0.5,false);
-        this.inactiveButtonGraphic.drawCircle(0,0,.5)
+        this.inactiveButtonGraphic = new PIXI.Graphics().circle(0,0,.5).fill(0x302d40).stroke(0x302d40);
         this.inactiveButtonTexture = app.renderer.generateTexture(this.inactiveButtonGraphic);
         for (let i=numFloors-1; i>=0; i--) {
         this.buttons[i] = new Object;
@@ -389,4 +383,4 @@ function requestElevator(floor) {
     }
   }
 
-export {ElevatorConsole, Floors, Elevator, floorRequests, requestElevator};
+export {ElevatorConsole, HallButtons, Elevator, floorRequests, requestElevator};
