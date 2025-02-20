@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "parcel": "^2.13.3",
+    "parcel-reporter-static-files-copy": "^1.5.3"
+  }
+}

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Page Title</title>
+        <link rel="stylesheet" href="styles.css" />
+        <script src="https://pixijs.download/release/pixi.js"></script>
+    </head>
+    <body>
+        <div id="frame"></div>
+
+        <script type="module">(async () => {
+            const engine = await import("./modules/engine.mjs");
+            await import("./modules/params.mjs");
+            await import("./modules/support.mjs");
+            await import("./modules/elevator.mjs");
+            await import("./modules/passengers.mjs");
+            const static_bg = await import("./modules/static_background.mjs");
+            const game = await import("./modules/main_loop.mjs");
+            const branding = await import("./modules/branding.mjs");
+            const [app, container] = await engine.engine_start();
+            
+            branding.branding1(app, container);
+            static_bg.draw_floors(app, container);
+            game.main_loop(app, container);
+            // will need to move these to a setup function
+        })();</script>
+
+    </body>
+</html>
