@@ -2,7 +2,7 @@ import { SPEED, floorZeroY, floorHeight } from './params.mjs';
 
 function randPoisson(lambda) {
     // https://stackoverflow.com/questions/1241555/algorithm-to-generate-poisson-and-binomial-random-numbers
-    let L = Math.exp(-lambda/SPEED);
+    let L = Math.exp(-lambda / SPEED);
     let p = 1.0;
     let k = 0;
 
@@ -30,4 +30,4 @@ function elevYToFloorIfSafe(y) {
     return floor;
 }
 
-export {randPoisson, elevYToFloorIfSafe};
+export { randPoisson, elevYToFloorIfSafe };
