@@ -1,5 +1,5 @@
 import {
-    numFloors, floorZeroX, floorZeroY, floorHeight, eleWidth, floorHeight, higestRequestedFloor, 
+    numFloors, floorZeroX, floorZeroY, floorHeight, eleWidth, floorHeight, 
     ELEV_SPEED, SPEED
 } from "./params.mjs";
 
@@ -10,8 +10,7 @@ floorRequests = new Array(numFloors).fill(false)
 ;
 
 
-export let higestRequestedFloor = -1,  // neg. one indicates no floors are awaiting elevator
-elevatorsLastStatus = -1  // for debugging;
+let higestRequestedFloor = -1 // neg. one indicates no floors are awaiting elevator
 ;
 
 class ElevatorConsole {
@@ -159,7 +158,7 @@ function Elevator(app, container) {
               }
             }
             // check for floor requests
-            for (i=numFloors-1; i>=0; i--) {
+            for (i=numFloors-1; i>=0; i--) { // prioritize higher floors
               if (floorRequests[i]) {
                 if (i == this.curFloor) {
                   this.currentStatus = 200;
