@@ -102,13 +102,9 @@ class Elevator{
     constructor(app, container) {
         this.curFloor = 0;
         this.movSpeed = ELEV_SPEED * SPEED; // value of one gave me about 1 second per floor
-        this.goingUp = true;
         this.direction = 0; // 0 = no direction; 1 = up; -1 = down
-        this.lastFloor = 0; // when moving up or down, don't stop at last floor where the door was open. this avoids infinite open close loops
         this.doorCloseDelay = 0;
         this.aboardCount = 0;
-        this.currentlyBoardingCount = 0;
-        this.currentlyDepartingCount = 0;
         this.floorRequests = new Array(numFloors).fill(false);
         this.higestRequestedFloor = -1;
         this.holdingDoor = false; // sprites can hold the door if there is more room on the elev and more sprites on the floor
@@ -175,19 +171,16 @@ class Elevator{
 					break;
 
 				case 1: // door is open, passengers are boarding and exiting
-					if (this.currentlyBoardingCount == 0 && this.currentlyDepartingCount == 0) {
-						if (this.doorCloseDelay >= 6 & !this.holdingDoor) {
-							this.currentStatus = 300;
-							this.doorCloseDelay = 0;
-						} else {
-							this.doorCloseDelay += 1;
-						}
+					if (this.doorCloseDelay >= 6 & !this.holdingDoor) {
+						this.currentStatus = 300;
+						this.doorCloseDelay = 0;
+					} else {
+						this.doorCloseDelay += 1;
 					}
 					break;
 
 				case 100: // going up
 					// go up and stop in only two cases: riders' destination, or the highest requested floor
-					this.goingUp = true; // TODO: DELETE
 					this.curFloor = elevYToFloorIfSafe(this.y)
 					if (this.curFloor > -1) {
 						if (this.floorRequests[this.curFloor]) { // a rider requested this floor, need to stop
@@ -198,12 +191,10 @@ class Elevator{
 						}
 						if (this.higestRequestedFloor < this.curFloor) {
 							if (higestRequestedFloor == this.curFloor) { // no riders going up and this is the higest request
-							if (this.lastFloor != this.curFloor) {
-								this.cancelElevatorRequest(this.curFloor);
-								cancelElevatorRequest(this.curFloor);
-								this.currentStatus = 200;
-								break;
-							}
+									this.cancelElevatorRequest(this.curFloor);
+									cancelElevatorRequest(this.curFloor);
+									this.currentStatus = 200;
+									break;
 							}
 						}
 					}
@@ -211,16 +202,13 @@ class Elevator{
 					break;
 
 				case 101: // going down
-					this.goingUp = false; // TODO: DELETE
 					this.curFloor = elevYToFloorIfSafe(this.y)
 					if (this.curFloor > -1) {
 						if (this.floorRequests[this.curFloor] || floorRequests[this.curFloor]) {
-							if (this.lastFloor != this.curFloor) {
 								this.cancelElevatorRequest(this.curFloor);
 								cancelElevatorRequest(this.curFloor);
 								this.currentStatus = 200;
 								break;
-							}
 						}
 					}
 					this.y += (this.movSpeed*floorHeight * timeDelta/60);

@@ -89,7 +89,7 @@ class Person {
         this.exitDoorNum = Math.floor(Math.random()*3)
         this.exitDoorXLoc = floorZeroX + (this.destinationFloor==0 ? maxX : Math.random()*95);
         this.currentStatus = 0;
-        this.holdingDoor = false; // not needed for the logic but used for displaying sprite status
+        this.holdingDoorForNextPers = false; // not needed for the logic but used for displaying sprite status
 
         this.movementSpeedModifier = Math.random()*0.6+0.9;
         /**
@@ -112,6 +112,7 @@ class Person {
         this.move = function (time, timeDelta, elev, app) {
         switch (this.currentStatus) {
             case 0: // Waiting for an elevator // ! 0909
+                this.holdingDoorForNextPers = false;
                 // Adjust position in queue
                 if (queuePositionsByFloor[this.startingFloor][this.positionInQueue-1] == false) {
                     // if space to the right freed up, move right
@@ -149,6 +150,7 @@ class Person {
                             if (elev.aboardCount < MAX_PASSENGERS) {
                                 elev.currentlyBoardingCount ++;
                                 this.currentStatus = 1;
+                                elev.holdingDoor = true;
                                 queuePositionsByFloor[this.startingFloor][this.positionInQueue] = false;
                                 this.positionInQueue = -1;
                                 queueLengthByFloor[this.startingFloor] --;
@@ -161,9 +163,11 @@ class Person {
 
             case 1: // Boarding the elevator // ! 0909
                 // walk towards the elevator until on it
+                this.holdingDoorForNextPers = false;
                 // *remember: elevator's passenger count was already increased in case 0
                 if (this.x < floorZeroX + eleWidth/2-1) {
                     this.x += personsMovementSpeed * timeDelta / 60;
+                    elev.holdingDoor = true;
                 } else {
                     this.currentStatus = 100;
                     elev.aboardCount ++;
@@ -177,16 +181,17 @@ class Person {
                 if (elev.currentStatus == 1) {
                 if (elev.aboardCount < MAX_PASSENGERS & queueLengthByFloor[elev.curFloor] > 0) {
                     elev.holdingDoor = true;
-                    this.holdingDoor = true;
+                    this.holdingDoorForNextPers = true;
                 } else {
                     elev.holdingDoor = false;
-                    this.holdingDoor = false;
+                    this.holdingDoorForNextPers = false;
                 }
                 }
                 // Arrived at the destination floor?
                 if (elev.curFloor == this.destinationFloor) {
                     if (elev.currentStatus==1) {
                         this.currentStatus = 101;
+                        elev.holdingDoor = true;
                         elev.currentlyDepartingCount ++ ;
                         elev.aboardCount -- ;
                     }
@@ -197,8 +202,10 @@ class Person {
                 break;
 
             case 101: // Exiting the elevator // ! 0909
+                this.holdingDoorForNextPers = false;
                 if (this.x < floorZeroX + 10) {
                     this.x += personsMovementSpeed * timeDelta / 60;
+                    elev.holdingDoor = true;
                 } else {
                     this.currentStatus = 200;
                     elev.currentlyDepartingCount --;
@@ -206,6 +213,7 @@ class Person {
 
                 break;
             case 200: // Walking towards "exit" // ! 0909
+                this.holdingDoorForNextPers = false;
                 // move sprite to the right until reaching exitDoorXLoc
                 if (this.x < this.exitDoorXLoc) {
                     this.x += this.movementSpeedModifier*personsMovementSpeed * timeDelta / 60;

@@ -12,6 +12,7 @@ function main_loop(app, container) {
     app.ticker.add((delta_obj) => {
         delta = delta_obj.deltaTime;
         elapsed += delta;
+        elev.holdingDoor = false;
         if (elapsed >= nextArrivalsTime) {
             createNewPerson(elapsed);
         }
