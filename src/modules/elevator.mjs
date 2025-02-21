@@ -98,254 +98,248 @@ class HallButtons {
     }
 }
 
-function Elevator(app, container) {
+class Elevator{
+    constructor(app, container) {
+        this.curFloor = 0;
+        this.movSpeed = ELEV_SPEED * SPEED; // value of one gave me about 1 second per floor
+        this.goingUp = true;
+        this.direction = 0; // 0 = no direction; 1 = up; -1 = down
+        this.lastFloor = 0; // when moving up or down, don't stop at last floor where the door was open. this avoids infinite open close loops
+        this.doorCloseDelay = 0;
+        this.aboardCount = 0;
+        this.currentlyBoardingCount = 0;
+        this.currentlyDepartingCount = 0;
+        this.floorRequests = new Array(numFloors).fill(false);
+        this.higestRequestedFloor = -1;
+        this.holdingDoor = false; // sprites can hold the door if there is more room on the elev and more sprites on the floor
+        this.currentStatus = 0;
+        /**
+         * 0   = idle i.e. standing, no passengers (and the door is open);
+         * 1   = riders are boarding the elevator; // TODO: delete
+         * 2   = riders are exiting the elevator; // TODO: delete
+         * 1   = the door is open, riders are boarding or exiting;
+         * 100 = going up;
+         * 101 = going down;
+         * 200 = opening door;
+         * 300 = closing door;
+         * 
+         * Examples of state transition:
+         * 0 >> 1 >> 300 >> 100 >> 200 >> 1 >> 300 >> 100 >> 200 >> 2 >> 1 >> 101 >> 200 > 2 >> 0;
+         * 0 >> 300 >> 101 >> 200 >> 1 >> 300 >> 101 >> 200 >> 2 >> 0;
+         */
+        //TODO: once all riders depart and noone boards, go to the highest floor where elevator was requested
 
-    this.curFloor = 0;
-    this.movSpeed = ELEV_SPEED * SPEED; // value of one gave me about 1 second per floor
-    this.goingUp = true;
-    this.direction = 0; // 0 = no direction; 1 = up; -1 = down
+        // Initiate sprite
+        this.graphic = new PIXI.Graphics()
+            .roundRect(0,0,eleWidth,floorHeight,2)
+            .stroke({ color: 0xffffff, pixelLine: true });
+        this.texture = app.renderer.generateTexture(this.graphic);
+        this.sprite = new PIXI.Sprite(this.texture);
+        this.x = floorZeroX;
+        this.y = floorZeroY;
+        this.sprite.x = floorZeroX;
+        this.sprite.y = floorZeroY;
+        app.stage.addChild(this.sprite);
 
-    this.lastFloor = 0; // when moving up or down, don't stop at last floor where the door was open. this avoids infinite open close loops
+        this.move = function(timeDelta, time) {
+            switch (this.currentStatus) {
+				case 0: // idle & door is closed
+					// clear requests for the current floor
+					if (this.curFloor > -1) {
+						if (this.floorRequests[this.curFloor]) {
+							this.cancelElevatorRequest(this.curFloor);
+							console.log('Canceling ' + this.curFloor);
+						}
+					}
+					// check for floor requests
+					for (let i=numFloors-1; i>=0; i--) { // prioritize higher floors
+						if (floorRequests[i]) {
+							if (i == this.curFloor) {
+								this.currentStatus = 200;
+								cancelElevatorRequest(this.curFloor);
+							}
+						else {
+							this.currentStatus = i > this.curFloor ? 100 : 101;
+							this.direction = i > this.curFloor ? 1 : -1;
+						}
+						}
+					}
+					if (this.currentStatus == 0) {
+						for (let i=numFloors-1; i>=0; i--) {
+							if (this.floorRequests[i]) { //xxx this instead of elev.
+								this.currentStatus = i > this.curFloor ? 100 : 101;
+								this.direction = i > this.curFloor ? 1 : -1;
+							}
+						}
+					}
+					break;
 
-    this.doorCloseDelay = 0;
+				case 1: // door is open, passengers are boarding and exiting
+					if (this.currentlyBoardingCount == 0 && this.currentlyDepartingCount == 0) {
+						if (this.doorCloseDelay >= 6 & !this.holdingDoor) {
+							this.currentStatus = 300;
+							this.doorCloseDelay = 0;
+						} else {
+							this.doorCloseDelay += 1;
+						}
+					}
+					break;
 
-    this.aboardCount = 0;
-    this.currentlyBoardingCount = 0;
-    this.currentlyDepartingCount = 0;
+				case 100: // going up
+					// go up and stop in only two cases: riders' destination, or the highest requested floor
+					this.goingUp = true; // TODO: DELETE
+					this.curFloor = elevYToFloorIfSafe(this.y)
+					if (this.curFloor > -1) {
+						if (this.floorRequests[this.curFloor]) { // a rider requested this floor, need to stop
+							this.cancelElevatorRequest(this.curFloor);
+							cancelElevatorRequest(this.curFloor);
+							this.currentStatus = 200;
+							break;
+						}
+						if (this.higestRequestedFloor < this.curFloor) {
+							if (higestRequestedFloor == this.curFloor) { // no riders going up and this is the higest request
+							if (this.lastFloor != this.curFloor) {
+								this.cancelElevatorRequest(this.curFloor);
+								cancelElevatorRequest(this.curFloor);
+								this.currentStatus = 200;
+								break;
+							}
+							}
+						}
+					}
+					this.y += - (this.movSpeed*floorHeight * timeDelta/60);
+					break;
 
-    this.floorRequests = new Array(numFloors).fill(false);
-    this.higestRequestedFloor = -1;
+				case 101: // going down
+					this.goingUp = false; // TODO: DELETE
+					this.curFloor = elevYToFloorIfSafe(this.y)
+					if (this.curFloor > -1) {
+						if (this.floorRequests[this.curFloor] || floorRequests[this.curFloor]) {
+							if (this.lastFloor != this.curFloor) {
+								this.cancelElevatorRequest(this.curFloor);
+								cancelElevatorRequest(this.curFloor);
+								this.currentStatus = 200;
+								break;
+							}
+						}
+					}
+					this.y += (this.movSpeed*floorHeight * timeDelta/60);
+					break;
 
-    this.holdingDoor = false; // sprites can hold the door if there is more room on the elev and more sprites on the floor
+				case 200: // door is opening
+					// TODO: add timer to simultae door opening
+					this.currentStatus = 1;
+					break;
 
-    this.currentStatus = 0;
-    /**
-     * 0   = idle i.e. standing, no passengers (and the door is open);
-     * 1   = riders are boarding the elevator; // TODO: delete
-     * 2   = riders are exiting the elevator; // TODO: delete
-     * 1   = the door is open, riders are boarding or exiting;
-     * 100 = going up;
-     * 101 = going down;
-     * 200 = opening door;
-     * 300 = closing door;
-     * 
-     * Examples of state transition:
-     * 0 >> 1 >> 300 >> 100 >> 200 >> 1 >> 300 >> 100 >> 200 >> 2 >> 1 >> 101 >> 200 > 2 >> 0;
-     * 0 >> 300 >> 101 >> 200 >> 1 >> 300 >> 101 >> 200 >> 2 >> 0;
-     */
-    //TODO: once all riders depart and noone boards, go to the highest floor where elevator was requested
-
-    // Initiate sprite
-    this.graphic = new PIXI.Graphics()
-        .roundRect(0,0,eleWidth,floorHeight,2)
-        .stroke({ color: 0xffffff, pixelLine: true });
-    this.texture = app.renderer.generateTexture(this.graphic);
-    this.sprite = new PIXI.Sprite(this.texture);
-    this.x = floorZeroX;
-    this.y = floorZeroY;
-    this.sprite.x = floorZeroX;
-    this.sprite.y = floorZeroY;
-    app.stage.addChild(this.sprite);
-
-    this.move = function(timeDelta, time) {
-        switch (this.currentStatus) {
-          case 0: // idle & door is closed
-            // clear requests for the current floor
-            if (this.curFloor > -1) {
-              if (this.floorRequests[this.curFloor]) {
-                this.cancelElevatorRequest(this.curFloor);
-                console.log('Canceling ' + this.curFloor);
-              }
-            }
-            // check for floor requests
-            for (i=numFloors-1; i>=0; i--) { // prioritize higher floors
-              if (floorRequests[i]) {
-                if (i == this.curFloor) {
-                  this.currentStatus = 200;
-                  cancelElevatorRequest(this.curFloor);
-                  //console.log(higestRequestedFloor)
-                }
-                else {
-                  this.currentStatus = i > this.curFloor ? 100 : 101;
-                  this.direction = i > this.curFloor ? 1 : -1;
-                }
-              }
-            }
-            if (this.currentStatus == 0) {
-              for (i=numFloors-1; i>=0; i--) {
-                if (this.floorRequests[i]) { //xxx this instead of elev.
-                  this.currentStatus = i > this.curFloor ? 100 : 101;
-                  this.direction = i > this.curFloor ? 1 : -1;
-                }
-              }
-            }
-            break;
-
-          case 1: // door is open, passengers are boarding and exiting
-            if (this.currentlyBoardingCount == 0 && this.currentlyDepartingCount == 0) {
-              if (this.doorCloseDelay >= 6 & !this.holdingDoor) {
-                this.currentStatus = 300;
-                this.doorCloseDelay = 0;
-              } else {
-                this.doorCloseDelay += 1;
-              }
-            }
-            break;
-
-          case 100: // going up
-            // go up and stop in only two cases: riders' destination, or the highest requested floor
-            this.goingUp = true; // TODO: DELETE
-            this.curFloor = elevYToFloorIfSafe(this.y)
-            if (this.curFloor > -1) {
-              if (this.floorRequests[this.curFloor]) { // a rider requested this floor, need to stop
-                this.cancelElevatorRequest(this.curFloor);
-                cancelElevatorRequest(this.curFloor);
-                this.currentStatus = 200;
-                break;
-              }
-              if (this.higestRequestedFloor < this.curFloor) {
-                if (higestRequestedFloor == this.curFloor) { // no riders going up and this is the higest request
-                  if (this.lastFloor != this.curFloor) {
-                    this.cancelElevatorRequest(this.curFloor);
-                    cancelElevatorRequest(this.curFloor);
-                    this.currentStatus = 200;
-                    break;
-                  }
-                }
-              }
-            }
-            this.y += - (this.movSpeed*floorHeight * timeDelta/60);
-            break;
-
-          case 101: // going down
-            this.goingUp = false; // TODO: DELETE
-            this.curFloor = elevYToFloorIfSafe(this.y)
-            if (this.curFloor > -1) {
-              if (this.floorRequests[this.curFloor] || floorRequests[this.curFloor]) {
-                if (this.lastFloor != this.curFloor) {
-                  this.cancelElevatorRequest(this.curFloor);
-                  cancelElevatorRequest(this.curFloor);
-                  this.currentStatus = 200;
-                  break;
-                }
-              }
-            }
-            this.y += (this.movSpeed*floorHeight * timeDelta/60);
-            break;
-
-          case 200: // door is opening
-            // TODO: add timer to simultae door opening
-            this.currentStatus = 1;
-            break;
-
-          case 300: // door is closing
-            // TODO: add timer to simultae door closing
-            this.curFloor = elevYToFloorIfSafe(this.y);
-            this.lastFloor = this.curFloor;
-            switch (this.direction) {
-              case 1: {
-                if (this.aboardCount > 0) {
-                  if (this.higestRequestedFloor > this.curFloor && this.higestRequestedFloor >= 0) {
-                    this.currentStatus = 100;
-                    this.direction = 1;
-                    break;
-                  } 
-                  if (this.higestRequestedFloor < this.curFloor && this.higestRequestedFloor >= 0) {
-                    this.currentStatus = 101;
-                    this.direction = -1;
-                    break;
-                  }
-                }
-                else {
-                  if (higestRequestedFloor > this.curFloor && higestRequestedFloor >= 0) {
-                    this.currentStatus = 100;
-                    this.direction = 1;
-                    break;
-                  }
-                  else if (higestRequestedFloor < this.curFloor && higestRequestedFloor >= 0) {
-                    this.currentStatus = 101;
-                    this.direction = -1;
-                    break;
-                  }
-                  else {
-                    this.currentStatus = 0;
-                    this.direction = 0;
-                  }
-                }
-              }
-              case -1: {
-                if (this.aboardCount > 0) {
-                  if (this.higestRequestedFloor < this.curFloor && this.higestRequestedFloor >= 0) {
-                    this.currentStatus = 101;
-                    this.direction = -1;
-                    break;
-                  }
-                  else if (this.higestRequestedFloor > this.curFloor) {
-                    this.currentStatus = 100;
-                    this.direction = 1;
-                    break;
-                  }
-                }
-                else {
-                  if (higestRequestedFloor < this.curFloor && higestRequestedFloor >= 0) {
-                    this.currentStatus = 101;
-                    this.direction = -1;
-                    break;
-                  }
-                  else if (higestRequestedFloor > this.curFloor && higestRequestedFloor >= 0) {
-                    this.currentStatus = 100;
-                    this.direction = 1;
-                    break;
-                  }
-                  else {
-                    this.currentStatus = 0;
-                    this.direction = 0;
-                  }
-                }
-              }
-              case 0: {
-                if (this.higestRequestedFloor > this.curFloor && this.higestRequestedFloor >= 0 || higestRequestedFloor > this.curFloor && higestRequestedFloor >= 0) {
-                  this.currentStatus = 100;
-                  this.direction = 1;
-                  break;
-                }
-                else if (this.higestRequestedFloor < this.curFloor && this.higestRequestedFloor >= 0 || higestRequestedFloor < this.curFloor && higestRequestedFloor >= 0) {
-                  this.currentStatus = 101;
-                  this.direction = -1;
-                  break;
-                }
-              }
-            }
-            break;
+				case 300: // door is closing
+					// TODO: add timer to simultae door closing
+					this.curFloor = elevYToFloorIfSafe(this.y);
+					this.lastFloor = this.curFloor;
+					switch (this.direction) {
+						case 1: {
+							if (this.aboardCount > 0) {
+								if (this.higestRequestedFloor > this.curFloor && this.higestRequestedFloor >= 0) {
+									this.currentStatus = 100;
+									this.direction = 1;
+									break;
+								} 
+								if (this.higestRequestedFloor < this.curFloor && this.higestRequestedFloor >= 0) {
+									this.currentStatus = 101;
+									this.direction = -1;
+									break;
+								}
+							}
+							else {
+								if (higestRequestedFloor > this.curFloor && higestRequestedFloor >= 0) {
+									this.currentStatus = 100;
+									this.direction = 1;
+									break;
+								}
+								else if (higestRequestedFloor < this.curFloor && higestRequestedFloor >= 0) {
+									this.currentStatus = 101;
+									this.direction = -1;
+									break;
+								}
+								else {
+									this.currentStatus = 0;
+									this.direction = 0;
+								}
+							}
+						}
+						case -1: {
+							if (this.aboardCount > 0) {
+								if (this.higestRequestedFloor < this.curFloor && this.higestRequestedFloor >= 0) {
+									this.currentStatus = 101;
+									this.direction = -1;
+									break;
+								}
+								else if (this.higestRequestedFloor > this.curFloor) {
+									this.currentStatus = 100;
+									this.direction = 1;
+									break;
+								}
+							}
+							else {
+								if (higestRequestedFloor < this.curFloor && higestRequestedFloor >= 0) {
+									this.currentStatus = 101;
+									this.direction = -1;
+									break;
+								}
+								else if (higestRequestedFloor > this.curFloor && higestRequestedFloor >= 0) {
+									this.currentStatus = 100;
+									this.direction = 1;
+									break;
+								}
+								else {
+									this.currentStatus = 0;
+									this.direction = 0;
+								}
+							}
+						}
+						case 0: {
+							if (this.higestRequestedFloor > this.curFloor && this.higestRequestedFloor >= 0 || higestRequestedFloor > this.curFloor && higestRequestedFloor >= 0) {
+									this.currentStatus = 100;
+									this.direction = 1;
+								break;
+							}
+							else if (this.higestRequestedFloor < this.curFloor && this.higestRequestedFloor >= 0 || higestRequestedFloor < this.curFloor && higestRequestedFloor >= 0) {
+									this.currentStatus = 101;
+									this.direction = -1;
+								break;
+							}
+						}
+					}
+					break;
+			}
+            this.sprite.y = this.y; 
         }
-        this.sprite.y = this.y; 
-    }
 
-  this.pushButtonOnElev = function (floor) {
-    this.floorRequests[floor] = true;
-    this.higestRequestedFloor = -1;
-    for (i=numFloors-1; i>=0; i--) {
-      if (this.floorRequests[i]) {
-        this.higestRequestedFloor = i;
-        break;
+		this.pushButtonOnElev = function (floor) {
+			this.floorRequests[floor] = true;
+			this.higestRequestedFloor = -1;
+			for (i=numFloors-1; i>=0; i--) {
+					if (this.floorRequests[i]) {
+					this.higestRequestedFloor = i;
+				break;
+				}
+			}
+		}
+
+		this.cancelElevatorRequest = function (floor) { //xxx same name as global function. this one clears only the console, rename to match this purpose
+			this.floorRequests[floor] = false;
+		
+			this.higestRequestedFloor = -1;
+			for (i=numFloors-1; i>=0; i--) {
+				//console.log('here here ' + i)
+				if (this.floorRequests[i]) {
+					//console.log('true')
+					this.higestRequestedFloor = i;
+					break;
+				}
+			}
+			//console.log(this.higestRequestedFloor)
       }
     }
-  }
-
-  this.cancelElevatorRequest = function (floor) { //xxx same name as global function. this one clears only the console, rename to match this purpose
-    this.floorRequests[floor] = false;
-  
-    this.higestRequestedFloor = -1;
-    for (i=numFloors-1; i>=0; i--) {
-      //console.log('here here ' + i)
-      if (this.floorRequests[i]) {
-        //console.log('true')
-        this.higestRequestedFloor = i;
-        break;
-      }
-    }
-    //console.log(this.higestRequestedFloor)
-  }
 }
 
 function cancelElevatorRequest(floor) {
