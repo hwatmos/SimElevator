@@ -107,8 +107,10 @@ class Elevator{
         this.aboardCount = 0;
         this.floorRequests = new Array(numFloors).fill(false);
         this.higestRequestedFloor = -1;
+		this.lowestRequestedFloor = numFloors+999; // only used to check if a floor below was requested so a large number is ok
         this.holdingDoor = false; // sprites can hold the door if there is more room on the elev and more sprites on the floor
         this.currentStatus = 0;
+		this.numOfConsoleRequests = 0; // Tracks how many floors are currently lit up on the elevator console
         /**
          * 0   = idle i.e. standing, no passengers (and the door is open);
          * 1   = the door is open, riders are boarding or exiting;
@@ -120,6 +122,12 @@ class Elevator{
          * Examples of state transition:
          * 0 >> 1 >> 300 >> 100 >> 200 >> 1 >> 300 >> 100 >> 200 >> 2 >> 1 >> 101 >> 200 > 2 >> 0;
          * 0 >> 300 >> 101 >> 200 >> 1 >> 300 >> 101 >> 200 >> 2 >> 0;
+		 * 
+		 * General rule:
+		 * Always continue moving up (1) if the highest request is above.
+		 * Only continue moving down (-1) if the lowest console request is below.
+		 * When moving up (1), always stop at the console's requested floors.
+		 * When moving down (-1), always stop at the console and hall requests.
          */
         //TODO: once all riders depart and noone boards, go to the highest floor where elevator was requested
 
@@ -139,13 +147,16 @@ class Elevator{
             switch (this.currentStatus) {
 				case 0: // idle & door is closed
 					// clear requests for the current floor
-					if (this.curFloor > -1) {
+					//if (this.curFloor > -1) { // delete?
 						if (this.floorRequests[this.curFloor]) {
 							this.cancelElevatorRequest(this.curFloor);
-							console.log('Canceling ' + this.curFloor);
 						}
-					}
-					// check for floor requests
+					//} // delete?
+					// The next two sections check for requests. Hall requests are prioritized, i.e. if a hall request
+					// was made at the same time as the console request, the hall request dictates the direction (this
+					// is not a very likely situation for both types of requests to occur simultaneously)
+
+					// Check for hall requests
 					for (let i=numFloors-1; i>=0; i--) { // prioritize higher floors
 						if (floorRequests[i]) {
 							if (i == this.curFloor) {
@@ -158,9 +169,10 @@ class Elevator{
 						}
 						}
 					}
+					// if no hall requests, check what console requests were made
 					if (this.currentStatus == 0) {
-						for (let i=numFloors-1; i>=0; i--) {
-							if (this.floorRequests[i]) { //xxx this instead of elev.
+						for (let i=numFloors-1; i>=0; i--) { // prioritize higher floors
+							if (this.floorRequests[i]) {
 								this.currentStatus = i > this.curFloor ? 100 : 101;
 								this.direction = i > this.curFloor ? 1 : -1;
 							}
@@ -220,70 +232,41 @@ class Elevator{
 				case 300: // door is closing
 					// TODO: add timer to simultae door closing
 					this.curFloor = elevYToFloorIfSafe(this.y);
-					this.lastFloor = this.curFloor;
 					switch (this.direction) {
 						case 1: {
-							if (this.aboardCount > 0) {
-								if (this.higestRequestedFloor > this.curFloor && this.higestRequestedFloor >= 0) {
-									this.currentStatus = 100;
-									this.direction = 1;
-									break;
-								} 
-								if (this.higestRequestedFloor < this.curFloor && this.higestRequestedFloor >= 0) {
-									this.currentStatus = 101;
-									this.direction = -1;
-									break;
-								}
+							if (this.higestRequestedFloor > this.curFloor || higestRequestedFloor > this.curFloor) {
+								this.currentStatus = 100;
+								this.direction = 1;
+								break;
+							}
+							else if (this.higestRequestedFloor < this.curFloor || higestRequestedFloor < this.curFloor) {
+								this.currentStatus = 101;
+								this.direction = -1;
+								break;
 							}
 							else {
-								if (higestRequestedFloor > this.curFloor && higestRequestedFloor >= 0) {
-									this.currentStatus = 100;
-									this.direction = 1;
-									break;
-								}
-								else if (higestRequestedFloor < this.curFloor && higestRequestedFloor >= 0) {
-									this.currentStatus = 101;
-									this.direction = -1;
-									break;
-								}
-								else {
-									this.currentStatus = 0;
-									this.direction = 0;
-								}
+								this.currentStatus = 0;
+								this.direction = 0;
 							}
 						}
 						case -1: {
-							if (this.aboardCount > 0) {
-								if (this.higestRequestedFloor < this.curFloor && this.higestRequestedFloor >= 0) {
-									this.currentStatus = 101;
-									this.direction = -1;
-									break;
-								}
-								else if (this.higestRequestedFloor > this.curFloor) {
-									this.currentStatus = 100;
-									this.direction = 1;
-									break;
-								}
+							if (this.lowestRequestedFloor < this.curFloor) {
+								this.currentStatus = 101;
+								this.direction = -1;
+								break;
+							}
+							else if (this.higestRequestedFloor > this.curFloor || higestRequestedFloor > this.curFloor) {
+								this.currentStatus = 100;
+								this.direction = 1;
+								break;
 							}
 							else {
-								if (higestRequestedFloor < this.curFloor && higestRequestedFloor >= 0) {
-									this.currentStatus = 101;
-									this.direction = -1;
-									break;
-								}
-								else if (higestRequestedFloor > this.curFloor && higestRequestedFloor >= 0) {
-									this.currentStatus = 100;
-									this.direction = 1;
-									break;
-								}
-								else {
-									this.currentStatus = 0;
-									this.direction = 0;
-								}
+								this.currentStatus = 0;
+								this.direction = 0;
 							}
 						}
 						case 0: {
-							if (this.higestRequestedFloor > this.curFloor && this.higestRequestedFloor >= 0 || higestRequestedFloor > this.curFloor && higestRequestedFloor >= 0) {
+							if (this.higestRequestedFloor > this.curFloor || higestRequestedFloor > this.curFloor) {
 									this.currentStatus = 100;
 									this.direction = 1;
 								break;
@@ -301,29 +284,44 @@ class Elevator{
         }
 
 		this.pushButtonOnElev = function (floor) {
-			this.floorRequests[floor] = true;
-			this.higestRequestedFloor = -1;
+			if (!this.floorRequests[floor]) {
+				this.numOfConsoleRequests ++;
+				this.floorRequests[floor] = true;
+			}
+			this.higestRequestedFloor = -1
 			for (i=numFloors-1; i>=0; i--) {
 					if (this.floorRequests[i]) {
 					this.higestRequestedFloor = i;
 				break;
 				}
 			}
+			this.lowestRequestedFloor = numFloors+999;
+			for (i=0; i<=numFloors-1; i++) {
+					if (this.floorRequests[i]) {
+					this.lowestRequestedFloor = i;
+				break;
+				}
+			}
 		}
 
-		this.cancelElevatorRequest = function (floor) { //xxx same name as global function. this one clears only the console, rename to match this purpose
+		this.cancelElevatorRequest = function (floor) { // same name as global function. this one clears only the console, rename to match this purpose
 			this.floorRequests[floor] = false;
+			this.numOfConsoleRequests --;
 		
 			this.higestRequestedFloor = -1;
 			for (i=numFloors-1; i>=0; i--) {
-				//console.log('here here ' + i)
 				if (this.floorRequests[i]) {
-					//console.log('true')
 					this.higestRequestedFloor = i;
 					break;
 				}
 			}
-			//console.log(this.higestRequestedFloor)
+			this.lowestRequestedFloor = numFloors+999;
+			for (i=0; i<=numFloors-1; i++) {
+					if (this.floorRequests[i]) {
+					this.lowestRequestedFloor = i;
+				break;
+				}
+			}
       }
     }
 }
