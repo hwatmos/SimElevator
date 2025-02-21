@@ -111,8 +111,6 @@ class Elevator{
         this.currentStatus = 0;
         /**
          * 0   = idle i.e. standing, no passengers (and the door is open);
-         * 1   = riders are boarding the elevator; // TODO: delete
-         * 2   = riders are exiting the elevator; // TODO: delete
          * 1   = the door is open, riders are boarding or exiting;
          * 100 = going up;
          * 101 = going down;
