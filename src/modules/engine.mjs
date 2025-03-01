@@ -1,20 +1,17 @@
 export let axY, halfX, halfY, maxX, maxY  = null, container;
 
 async function engine_start() {
-  app = new PIXI.Application();
+  const app = new PIXI.Application();
   await app.init({
     autoResize: true,
     resolution: devicePixelRatio,
     backgroundColor: 0x3d3b49
   });
   document.querySelector('#frame').appendChild(app.canvas);
-  container = new PIXI.Container();
-  app.stage.addChild(container);
 
   window.addEventListener('resize', resize);
-  resize();
 
-  return [app, container];
+  return app;
 }
 
 function resize() {
@@ -29,4 +26,4 @@ function resize() {
   halfY = maxY/2.;
 }
 
-export {engine_start};
+export {engine_start, resize};

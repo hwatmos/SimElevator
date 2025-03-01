@@ -30,6 +30,16 @@ Please share your feedback, thoughts, ideas, and recommendations on anything tha
 
 # Changelog
 
+## [Not released]
+
+Changed
+* Make app global. 
+* Replace master container and use app.stage.addChild instead.
+
+Fixed
+* Fix loading PIXI as a global and as a module.
+* Fix various syntax errors.
+
 ## [2.0.0-beta] 02-21-2025
 
 Added

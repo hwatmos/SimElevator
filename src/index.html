@@ -4,12 +4,12 @@
         <meta charset="utf-8" />
         <title>Page Title</title>
         <link rel="stylesheet" href="styles.css" />
-        <script src="https://pixijs.download/release/pixi.js"></script>
     </head>
     <body>
         <div id="frame"></div>
 
         <script type="module">(async () => {
+            window.PIXI = await import("./modules/pixi.mjs");
             const engine = await import("./modules/engine.mjs");
             await import("./modules/params.mjs");
             await import("./modules/support.mjs");
@@ -18,11 +18,12 @@
             const static_bg = await import("./modules/static_background.mjs");
             const game = await import("./modules/main_loop.mjs");
             const branding = await import("./modules/branding.mjs");
-            const [app, container] = await engine.engine_start();
+            window.app = await engine.engine_start();
+            await engine.resize();
             
-            branding.branding1(app, container);
-            static_bg.draw_floors(app, container);
-            game.main_loop(app, container);
+            branding.branding1();
+            static_bg.draw_floors();
+            game.main_loop();
             // will need to move these to a setup function
         })();</script>
 

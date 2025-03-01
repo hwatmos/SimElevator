@@ -11,7 +11,7 @@ import {
 } from "./params.mjs";
 import { floorRequests, requestElevator } from "./elevator.mjs";
 import { randPoisson } from "./support.mjs";
-import { container, maxX } from "./engine.mjs";
+import { maxX } from "./engine.mjs";
 
 let
     queueLengthByFloor = new Array(numFloors).fill(0), // count of Sprites waiting i.e. excludes sprites that are from this floor but are already on elevator;
@@ -106,11 +106,11 @@ class Person {
         queuePositionsByFloor[this.startingFloor][this.positionInQueue] = true;
 
         this.destroy = function () {
-            container.removeChild(this.sprite);
+            app.stage.removeChild(this.sprite);
         };
 
         // Movement
-        this.move = function (time, timeDelta, elev, app) {
+        this.move = function (time, timeDelta, elev) {
             switch (this.currentStatus) {
                 case 0: // Waiting for an elevator // ! 0909
                     this.holdingDoorForNextPers = false;
@@ -259,14 +259,14 @@ class Person {
             this.sprite.tint = 0xff0000;
         })
 
-        container.addChild(this.sprite);
+        app.stage.addChild(this.sprite);
     }
 }
 
-function moveSprites(elapsed, delta, elev, app) {
+function moveSprites(elapsed, delta, elev) {
     for (let i = 0; i < numFloors; i++) {
         for (let j = 0; j < spritesByFloor[i].length; j++) {
-            spritesByFloor[i][j].move(elapsed, delta, elev, app);
+            spritesByFloor[i][j].move(elapsed, delta, elev);
         }
     }
 }

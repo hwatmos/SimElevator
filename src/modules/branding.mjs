@@ -1,6 +1,6 @@
 // colorPalette = [0xafc9ff, 0xc7d8ff, 0xfff4f3, 0xffe5cf, 0xffd9b2, 0xffffff, 0xffa651];
 
-function branding1(app, container) {
+function branding1() {
     const style = new PIXI.TextStyle({
         fontFamily: 'Courier New',
         fontSize: 24,
@@ -14,7 +14,7 @@ function branding1(app, container) {
     richText.interactive = true;
     richText.on('pointerdown', (event) => { console.log('clicked!'); });
 
-    container.addChild(richText);
+    app.stage.addChild(richText);
     return;
 }
 

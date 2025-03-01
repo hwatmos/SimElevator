@@ -2,11 +2,13 @@ import { Elevator, ElevatorConsole, HallButtons } from "./elevator.mjs";
 import { moveSprites, createNewPerson, nextArrivalsTime } from "./passengers.mjs";
 
 let elapsed = 0.0;
+    let delta = 0.0;
 
-function main_loop(app, container) {
-    const elev = new Elevator(app, container);
-    const elevConsole = new ElevatorConsole(app, container, elev);
-    const hallButtons = new HallButtons(app, container);
+function main_loop() {
+    const elev = new Elevator();
+    const elevConsole = new ElevatorConsole(elev);
+    const hallButtons = new HallButtons();
+    console.log('test');
 
     createNewPerson(elapsed, 0);
     app.ticker.add((delta_obj) => {
@@ -22,7 +24,7 @@ function main_loop(app, container) {
         }
 
         // Move and update all objects
-        moveSprites(elapsed, delta, elev, app);
+        moveSprites(elapsed, delta, elev,);
         elev.move(delta, elapsed);
         elevConsole.update(elev);
         hallButtons.update();

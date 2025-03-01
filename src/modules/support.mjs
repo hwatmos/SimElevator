@@ -15,7 +15,7 @@ function randPoisson(lambda) {
 
 function elevYToFloorIfSafe(y) {
     // Convert y-coordinate to floor number
-    threshold = 1;
+    let threshold = 1;
     let floor = -1; // this value indicates that the elevator is not aligned with any floor
     let lowerFloor = Math.floor(-(y - floorZeroY) / floorHeight);
     let upperFloor = Math.ceil(-(y - floorZeroY) / floorHeight);

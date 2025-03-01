@@ -5,7 +5,7 @@ let floorRequests = new Array(numFloors).fill(false);
 let higestRequestedFloor = -1 // neg. one indicates no floors are awaiting elevator;
 
 class ElevatorConsole {
-	constructor(app, container, elev) {
+	constructor(elev) {
 		// Initiate sprit
 		this.graphic = new PIXI.Graphics();
 		this.graphic.roundRect(0, 0, 44, Math.ceil(numFloors / 2) * 20 + 5, 2).stroke(0xafc9ff);
@@ -36,7 +36,7 @@ class ElevatorConsole {
 			this.consoleContainer.addChild(this.buttons[i].sprite);
 		}
 		this.consoleContainer.addChild(this.sprite);
-		container.addChild(this.consoleContainer);
+		app.stage.addChild(this.consoleContainer);
 
 		this.update = function (elev) {
 			for (let i = numFloors - 1; i >= 0; i--) {
@@ -52,7 +52,7 @@ class ElevatorConsole {
 
 class HallButtons {
 	// The buttons used to call the eleveator, one on each floor
-	constructor(app, container) {
+	constructor() {
 		// Initiate sprite
 		this.graphic = new PIXI.Graphics();
 		//this.graphic.lineStyle(1,0xafc9ff,1,0.5,false);
@@ -74,7 +74,7 @@ class HallButtons {
 			this.buttons[i].sprite.y = -(i) * floorHeight
 			this.sprite.addChild(this.buttons[i].sprite)
 		}
-		container.addChild(this.sprite);
+		app.stage.addChild(this.sprite);
 
 		this.update = function () {
 			for (let i = numFloors - 1; i >= 0; i--) {
@@ -89,7 +89,7 @@ class HallButtons {
 }
 
 class Elevator {
-	constructor(app, container) {
+	constructor() {
 		this.curFloor = 0;
 		this.movSpeed = ELEV_SPEED * SPEED; // value of one gave me about 1 second per floor
 		this.direction = 0; // 0 = no direction; 1 = up; -1 = down
@@ -97,7 +97,7 @@ class Elevator {
 		this.aboardCount = 0;
 		this.floorRequests = new Array(numFloors).fill(false);
 		this.higestRequestedFloor = -1;
-		this.lowestRequestedFloor = numFloors + 999; // only used to check if a floor below was requested so a large number is ok
+		this.lowestRequestedFloor = -1; 
 		this.holdingDoor = false; // sprites can hold the door if there is more room on the elev and more sprites on the floor
 		this.currentStatus = 0;
 		this.numOfConsoleRequests = 0; // Tracks how many floors are currently lit up on the elevator console
@@ -131,7 +131,7 @@ class Elevator {
 		this.y = floorZeroY;
 		this.sprite.x = floorZeroX;
 		this.sprite.y = floorZeroY;
-		container.addChild(this.sprite);
+		app.stage.addChild(this.sprite);
 
 		this.move = function (timeDelta, time) {
 			switch (this.currentStatus) {
@@ -229,7 +229,7 @@ class Elevator {
 								this.direction = 1;
 								break;
 							}
-							else if (this.higestRequestedFloor < this.curFloor || higestRequestedFloor < this.curFloor) {
+							else if ((0 <= this.higestRequestedFloor && this.higestRequestedFloor < this.curFloor) || (0 <= higestRequestedFloor && higestRequestedFloor < this.curFloor)) {
 								this.currentStatus = 101;
 								this.direction = -1;
 								break;
@@ -237,10 +237,11 @@ class Elevator {
 							else {
 								this.currentStatus = 0;
 								this.direction = 0;
+								break;
 							}
 						}
 						case -1: {
-							if (this.lowestRequestedFloor < this.curFloor) {
+							if (0 <= this.lowestRequestedFloor && this.lowestRequestedFloor < this.curFloor) {
 								this.currentStatus = 101;
 								this.direction = -1;
 								break;
@@ -261,7 +262,7 @@ class Elevator {
 								this.direction = 1;
 								break;
 							}
-							else if (this.higestRequestedFloor < this.curFloor && this.higestRequestedFloor >= 0 || higestRequestedFloor < this.curFloor && higestRequestedFloor >= 0) {
+							else if (0 <= this.higestRequestedFloor < this.curFloor && this.higestRequestedFloor >= 0 || 0 <= higestRequestedFloor < this.curFloor && higestRequestedFloor >= 0) {
 								this.currentStatus = 101;
 								this.direction = -1;
 								break;
@@ -279,14 +280,14 @@ class Elevator {
 				this.floorRequests[floor] = true;
 			}
 			this.higestRequestedFloor = -1
-			for (i = numFloors - 1; i >= 0; i--) {
+			for (let i = numFloors - 1; i >= 0; i--) {
 				if (this.floorRequests[i]) {
 					this.higestRequestedFloor = i;
 					break;
 				}
 			}
-			this.lowestRequestedFloor = numFloors + 999;
-			for (i = 0; i <= numFloors - 1; i++) {
+			this.lowestRequestedFloor = -1;
+			for (let i = 0; i <= numFloors - 1; i++) {
 				if (this.floorRequests[i]) {
 					this.lowestRequestedFloor = i;
 					break;
@@ -299,14 +300,14 @@ class Elevator {
 			this.numOfConsoleRequests--;
 
 			this.higestRequestedFloor = -1;
-			for (i = numFloors - 1; i >= 0; i--) {
+			for (let i = numFloors - 1; i >= 0; i--) {
 				if (this.floorRequests[i]) {
 					this.higestRequestedFloor = i;
 					break;
 				}
 			}
-			this.lowestRequestedFloor = numFloors + 999;
-			for (i = 0; i <= numFloors - 1; i++) {
+			this.lowestRequestedFloor = -1;
+			for (let i = 0; i <= numFloors - 1; i++) {
 				if (this.floorRequests[i]) {
 					this.lowestRequestedFloor = i;
 					break;
@@ -320,7 +321,7 @@ function cancelElevatorRequest(floor) {
 	floorRequests[floor] = false;
 
 	higestRequestedFloor = -1;
-	for (i = numFloors - 1; i >= 0; i--) {
+	for (let i = numFloors - 1; i >= 0; i--) {
 		if (floorRequests[i]) {
 			higestRequestedFloor = i;
 			break;
@@ -339,7 +340,7 @@ function requestElevator(floor) {
 		//console.log('Requested elevator on floor '+floor);
 
 		higestRequestedFloor = -1;
-		for (i = numFloors - 1; i >= 0; i--) {
+		for (let i = numFloors - 1; i >= 0; i--) {
 			if (floorRequests[i]) {
 				higestRequestedFloor = i;
 				break;
