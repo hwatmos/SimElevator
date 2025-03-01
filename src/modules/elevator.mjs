@@ -171,7 +171,7 @@ class Elevator {
 					break;
 
 				case 1: // door is open, passengers are boarding and exiting
-					if (this.doorCloseDelay >= 6 & !this.holdingDoor) {
+					if (this.doorCloseDelay >= 6 && !this.holdingDoor) {
 						this.currentStatus = 300;
 						this.doorCloseDelay = 0;
 					} else {

@@ -184,7 +184,6 @@ class Person {
                             elev.holdingDoor = true;
                             this.holdingDoorForNextPers = true;
                         } else {
-                            elev.holdingDoor = false;
                             this.holdingDoorForNextPers = false;
                         }
                     }
