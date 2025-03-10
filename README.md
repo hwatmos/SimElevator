@@ -39,6 +39,7 @@ Changed
 Fixed
 * Fix loading PIXI as a global and as a module.
 * Fix various syntax errors.
+* Fix elevetor leaving before last boarding passenger's X-coordinate is on the elevator.
 
 ## [2.0.0-beta] 02-21-2025
 
