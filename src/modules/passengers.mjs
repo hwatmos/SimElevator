@@ -88,7 +88,7 @@ class Person {
         this.x = this.startingFloor == 0 ? 0 : this.x;
         this.y = floorZeroY - floorHeight * floor + 15;
         this.exitDoorNum = Math.floor(Math.random() * 3)
-        this.exitDoorXLoc = floorZeroX + (this.destinationFloor == 0 ? maxX : Math.random() * 95);
+        this.exitDoorXLoc = (this.destinationFloor == 0 ? maxX : floorZeroX + Math.random() * 95);
         this.currentStatus = 0;
         this.holdingDoorForNextPers = false; // not needed for the logic but used for displaying sprite status
 

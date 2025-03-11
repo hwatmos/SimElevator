@@ -1,14 +1,16 @@
 import { numFloors, floorZeroX, floorZeroY, floorHeight, eleWidth, floorHeight, ELEV_SPEED, SPEED } from "./params.mjs";
 import { elevYToFloorIfSafe } from "./support.mjs";
+import { isPhone} from "./engine.mjs"
 
 let floorRequests = new Array(numFloors).fill(false);
 let higestRequestedFloor = -1 // neg. one indicates no floors are awaiting elevator;
 
 class ElevatorConsole {
 	constructor(elev) {
+		window.consoleScale = isPhone ? 2 : 1;
 		// Initiate sprit
 		this.graphic = new PIXI.Graphics();
-		this.graphic.roundRect(0, 0, 44, Math.ceil(numFloors / 2) * 20 + 5, 2).stroke(0xafc9ff);
+		this.graphic.roundRect(0, 0, 44 * window.consoleScale, Math.ceil(numFloors / 2) * 20 * window.consoleScale + 5, 2).stroke(0xafc9ff);
 		this.texture = app.renderer.generateTexture(this.graphic);
 		this.consoleContainer = new PIXI.Container();
 		this.sprite = new PIXI.Sprite(this.texture);
@@ -18,17 +20,17 @@ class ElevatorConsole {
 		this.sprite.y = 0;
 		// Buttons
 		this.buttons = new Array(numFloors);
-		this.activeButtonGraphic = new PIXI.Graphics().circle(0, 0, 7).fill(0xafc9ff);
+		this.activeButtonGraphic = new PIXI.Graphics().circle(0, 0, 7 * window.consoleScale).fill(0xafc9ff);
 		this.activeButtonTexture = app.renderer.generateTexture(this.activeButtonGraphic);
-		this.inactiveButtonGraphic = new PIXI.Graphics().circle(0, 0, 7).stroke(0xafc9ff);
+		this.inactiveButtonGraphic = new PIXI.Graphics().circle(0, 0, 7 * window.consoleScale).stroke(0xafc9ff);
 		this.inactiveButtonTexture = app.renderer.generateTexture(this.inactiveButtonGraphic);
 		for (let i = numFloors - 1; i >= 0; i--) {
 			this.buttons[i] = new Object;
 			// left or right
 			let col = i % 2 == 0 ? 0 : 1;
 			this.buttons[i].sprite = new PIXI.Sprite(this.inactiveButtonTexture);
-			this.buttons[i].sprite.x = 5 + col * 20
-			this.buttons[i].sprite.y = 5 + (Math.ceil(numFloors / 2) - Math.floor(i / 2) - 1) * 20
+			this.buttons[i].sprite.x = (5 + col * 20) * window.consoleScale
+			this.buttons[i].sprite.y = (5 + (Math.ceil(numFloors / 2) - Math.floor(i / 2) - 1) * 20 ) * window.consoleScale
 			this.buttons[i].sprite.visible = true
 			// player can press floor button on the elevator
 			this.buttons[i].sprite.interactive = true;

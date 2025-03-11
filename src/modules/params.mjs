@@ -11,9 +11,9 @@ export let
 
 export let
     numFloors = 10,
-    floorZeroX = 200,
-    floorZeroY = 350,
     floorHeight = 25,
+    floorZeroX = 125,
+    floorZeroY = (numFloors-1)*floorHeight+5,
     eleWidth = 15,
     elevOpen = true,
     elevOnboardingPauseTime = 100,
