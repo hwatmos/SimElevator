@@ -13,9 +13,10 @@ import { floorRequests, requestElevator } from "./elevator.mjs";
 import { randPoisson } from "./support.mjs";
 import { maxX } from "./engine.mjs";
 
+window.spritesByFloor = new Array(numFloors);
 let
     queueLengthByFloor = new Array(numFloors).fill(0), // count of Sprites waiting i.e. excludes sprites that are from this floor but are already on elevator;
-    spritesByFloor = new Array(numFloors),
+    //spritesByFloor = new Array(numFloors),
     passengers = [],
     nextArrivalsTime = randPoisson(60),
     queuePositionsByFloor = [],
@@ -83,6 +84,7 @@ class Person {
         this.destinationFloor = destinationFloor;
         this.direction = this.destinationFloor > this.startingFloor ? 1 : -1;
         this.requestedElevator = false;
+        this.awaitingDestruction = false;
 
         this.x = Math.min(floorZeroX - 10 * (queueLengthByFloor[floor] + 1), floorZeroX - Math.random() * 80 - 20);
         this.x = this.startingFloor == 0 ? 0 : this.x;
@@ -106,7 +108,7 @@ class Person {
         queuePositionsByFloor[this.startingFloor][this.positionInQueue] = true;
 
         this.destroy = function () {
-            app.stage.removeChild(this.sprite);
+            this.awaitingDestruction = true;
         };
 
         // Movement
@@ -262,6 +264,19 @@ class Person {
     }
 }
 
+function destroySprites() {
+    for (let i = 0; i < numFloors; i++) {
+        for (let j = spritesByFloor[i].length-1; j >= 0; j--) {
+            let thisSprite = spritesByFloor[i][j];
+            if (thisSprite.awaitingDestruction) {
+                spritesByFloor[i].splice(j,1);
+                app.stage.removeChild(thisSprite.sprite);
+                thisSprite.sprite.destroy();
+            }
+        }
+    }
+}
+
 function moveSprites(elapsed, delta, elev) {
     for (let i = 0; i < numFloors; i++) {
         for (let j = 0; j < spritesByFloor[i].length; j++) {
@@ -271,4 +286,4 @@ function moveSprites(elapsed, delta, elev) {
 }
 
 
-export { Person, moveSprites, passengers, createNewPerson, nextArrivalsTime };
+export { Person, moveSprites, passengers, createNewPerson, nextArrivalsTime, destroySprites };

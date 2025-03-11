@@ -1,5 +1,5 @@
 import { Elevator, ElevatorConsole, HallButtons } from "./elevator.mjs";
-import { moveSprites, createNewPerson, nextArrivalsTime } from "./passengers.mjs";
+import { moveSprites, createNewPerson, nextArrivalsTime, destroySprites } from "./passengers.mjs";
 
 let elapsed = 0.0;
     let delta = 0.0;
@@ -23,6 +23,7 @@ function main_loop() {
         }
 
         // Move and update all objects
+        destroySprites();
         moveSprites(elapsed, delta, elev);
         elev.move(delta, elapsed);
         elevConsole.update(elev);
