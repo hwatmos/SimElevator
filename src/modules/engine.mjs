@@ -5,7 +5,7 @@ async function engine_start() {
   maxY = 250;
   halfX = maxX/2.;
   halfY = maxY/2.;
-  isPhone =  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); // Assuming screen width less than or equal to 768px is a phone
+  isPhone =  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); 
 
   const app = new PIXI.Application();
   await app.init({
@@ -22,12 +22,10 @@ async function engine_start() {
 }
 
 function resize() {
-  isPhone =  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); // Assuming screen width less than or equal to 768px is a phone
+  isPhone =  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); // Kept for testing (browser's dev mode on PC)
   const scale = Math.min(1,window.innerWidth / maxX, window.innerHeight / maxY);
 
   app.stage.scale.set(scale);
-  // Get the parent
-  const parent = app.canvas.parentNode;
   // Resize the renderer
   app.renderer.resize(document.documentElement.clientWidth, document.documentElement.clientHeight);
 }
