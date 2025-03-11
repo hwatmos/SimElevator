@@ -11,7 +11,8 @@ import {
 } from "./params.mjs";
 import { floorRequests, requestElevator } from "./elevator.mjs";
 import { randPoisson } from "./support.mjs";
-import { maxX } from "./engine.mjs";
+import { maxX, maxY } from "./engine.mjs";
+import { sprite_status } from "./main_loop.mjs";
 
 window.spritesByFloor = new Array(numFloors);
 let
@@ -77,7 +78,7 @@ function pickPersonsColor(floor) {
 }
 
 class Person {
-    constructor(currentTime, floor, destinationFloor, sprite_status) {
+    constructor(currentTime, floor, destinationFloor) {
         this.color = pickPersonsColor(floor);
         this.birthTime = currentTime;
         this.startingFloor = floor;
@@ -269,6 +270,9 @@ function destroySprites() {
         for (let j = spritesByFloor[i].length-1; j >= 0; j--) {
             let thisSprite = spritesByFloor[i][j];
             if (thisSprite.awaitingDestruction) {
+                if (sprite_status.sprite_ref === thisSprite) {
+                    sprite_status.sprite_ref = null;
+                }
                 spritesByFloor[i].splice(j,1);
                 app.stage.removeChild(thisSprite.sprite);
                 thisSprite.sprite.destroy();
@@ -285,5 +289,32 @@ function moveSprites(elapsed, delta, elev) {
     }
 }
 
+class SpriteStatusBox {
+    constructor() {
+        this.sprite_ref;
+        const style_sprite_status_text = new PIXI.TextStyle({
+            fontFamily: 'Courier New',
+            fontSize: 13,
+            fill: '#33ff00',
+            lineJoin: 'round',
+        });
+        this.statusText = new PIXI.Text({text:"Click a sprite to view their current properties",style: style_sprite_status_text});
+        this.statusText.x = 10;
+        this.statusText.y = maxY+10;
+        app.stage.addChild(this.statusText);
+    
+        this.update = function () {
+            if (this.sprite_ref != null) {
+                this.statusText.text = "Status: " + this.sprite_ref.currentStatus +
+                ", Queue: " + (this.sprite_ref.enteredQueue ? this.sprite_ref.positionInQueue : "not yet") +
+                ", Dest: " + this.sprite_ref.destinationFloor +
+                (this.sprite_ref.holdingDoor ? ", holding door" : "");
+            } else {
+                this.statusText.text = "Click a sprite to view their current properties";
+            }
+        }
+    }
+  }
 
-export { Person, moveSprites, passengers, createNewPerson, nextArrivalsTime, destroySprites };
+
+export { Person, moveSprites, passengers, createNewPerson, nextArrivalsTime, destroySprites, SpriteStatusBox };
