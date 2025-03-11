@@ -6,7 +6,6 @@ async function engine_start() {
   halfX = maxX/2.;
   halfY = maxY/2.;
   isPhone =  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); // Assuming screen width less than or equal to 768px is a phone
-  isLandscape = window.innerHeight <= window.innerWidth;
 
   const app = new PIXI.Application();
   await app.init({
