@@ -1,7 +1,6 @@
 export let axY, halfX, halfY, maxX, maxY, isPhone = null, container;
 
 async function engine_start() {
-  testWidth = document.documentElement.clientWidth;
   maxX = 390;
   maxY = 250;
   halfX = maxX/2.;
