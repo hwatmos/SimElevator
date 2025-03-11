@@ -32,14 +32,24 @@ Please share your feedback, thoughts, ideas, and recommendations on anything tha
 
 ## [Not released]
 
+* Nothing here
+
+## [2.0.0] 03-11-2025
+
+Added
+* Implement sprite destruction.
+* Implement responsive design via stage scaling.
+
 Changed
 * Make app global. 
 * Replace master container and use app.stage.addChild instead.
+* Remove branding.
 
 Fixed
 * Fix loading PIXI as a global and as a module.
 * Fix various syntax errors.
 * Fix elevetor leaving before last boarding passenger's X-coordinate is on the elevator.
+* Sprite interactivity (was missing the status box in v2.0.0 beta).
 
 ## [2.0.0-beta] 02-21-2025
 
