@@ -4,6 +4,7 @@
         <meta charset="utf-8" />
         <title>Page Title</title>
         <link rel="stylesheet" href="styles.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
     </head>
     <body>
         <div id="frame"></div>
@@ -17,11 +18,11 @@
             await import("./modules/passengers.mjs");
             const static_bg = await import("./modules/static_background.mjs");
             const game = await import("./modules/main_loop.mjs");
-            const branding = await import("./modules/branding.mjs");
+            //const branding = await import("./modules/branding.mjs");
             window.app = await engine.engine_start();
             await engine.resize();
             
-            branding.branding1();
+            //branding.branding1();
             static_bg.draw_floors();
             game.main_loop();
             // will need to move these to a setup function
