@@ -32,7 +32,8 @@ Please share your feedback, thoughts, ideas, and recommendations on anything tha
 
 ## [Not released]
 
-* Nothing here
+Added
+* NaiveTalk (used for testing talk bubbles before a better talk system is implemented)
 
 ## [2.0.0] 03-11-2025
 

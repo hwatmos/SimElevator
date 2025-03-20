@@ -1,5 +1,6 @@
 import { Elevator, ElevatorConsole, HallButtons } from "./elevator.mjs";
 import { moveSprites, createNewPerson, nextArrivalsTime, destroySprites, SpriteStatusBox } from "./passengers.mjs";
+// import { NaiveTalk, } from "./talk_naive_engine.mjs"; // Uncomment to enable naive talk modules
 
 let elapsed = 0.0;
 let delta = 0.0;
@@ -10,6 +11,7 @@ function main_loop() {
     const elevConsole = new ElevatorConsole(elev);
     const hallButtons = new HallButtons();
     sprite_status = new SpriteStatusBox();
+    //const talk_floor_0 = new NaiveTalk(0, 0); // Uncomment for an example of using the NaiveTalk modules
 
     createNewPerson(elapsed, 0);
     app.ticker.add((delta_obj) => {
@@ -30,7 +32,8 @@ function main_loop() {
         elev.move(delta, elapsed);
         elevConsole.update(elev);
         hallButtons.update();
-        sprite_status.update()
+        sprite_status.update();
+        //talk_floor_0.update(elapsed); // Uncomment for an example of using the NaiveTalk modules
     });
 }
 
